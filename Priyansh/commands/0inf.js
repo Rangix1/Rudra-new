@@ -24,7 +24,7 @@ const time = process.uptime(),
 const moment = require("moment-timezone");
 var juswa = moment.tz("Asia/Kolkata").format("『D/MM/YYYY』 【HH:mm:ss】");
 var link =                                     
-["https://i.imgur.com/qNRmHpH.jpeg", "https://i.imgur.com/ENk4eP7.jpeg", "https://i.imgur.com/tszSI1Q.jpeg", "https://i.imgur.com/8YSQFnI.jpeg"];
+["https://i.imgur.com/qNRmHpH.jpeg", "https://i.imgur.com/ENk4eP7.jpeg", "https://i.imgur.com/tszSI1Q.jpeg", "https://i.imgur.com/8YSQFnI.jpeg","https://i.imgur.com/T5CMEGs.jpeg"];
 var callback = () => api.sendMessage({body:`🌹𝙰𝙳𝙼𝙸𝙽 𝙰𝙽𝙳 𝙱𝙾𝚃 𝙸𝙽𝙵𝙾𝚁𝙼𝙰𝚃𝙸𝙾𝙽 🇮🇳 
 
 
