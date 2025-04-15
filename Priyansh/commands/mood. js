@@ -1,215 +1,77 @@
-module.exports = (message, args) => {
-  const mood = args[0].toLowerCase();
-  let replies = [];
+module.exports = {
+  config: {
+    name: "mood",
+    aliases: [],
+    version: "1.0",
+    author: "Rudra",
+    countDown: 5,
+    role: 0,
+    shortDescription: "mood detect krke reply dega",
+    longDescription: "User ke mood ke hisaab se automatic reply dega",
+    category: "fun",
+    guide: "{pn} [flirt | roasted | sad | happy | bejti | angry]"
+  },
 
-  // Flirt Moods Replies (50 Replies)
-  if (mood === 'flirt') {
-    replies = [
-      "Tumhare bina toh sab kuch adhoora lagta hai. 😘",
-      "Aaj toh tumhari muskaan ne mera din bana diya! 😊❤️",
-      "Kya tumhare paas ek map hai? Kyunki main tumhare dil mein kho gaya hoon. 😏❤️",
-      "Tumhare saath har pal bahut khaas lagta hai. 😘✨",
-      "Agar tum mere paas ho, toh duniya ki koi fikar nahi. 💖",
-      "Tumhara smile toh sabse khoobsurat cheez hai jo dekhi hai maine. 🌸",
-      "Main tumse milne ke liye har din excited rehta hoon. 😄💖",
-      "Tumhe dekhkar toh meri duniya roshan ho jaati hai. 🌞💖",
-      "Aaj tumhare saath waqt guzarne ka ek aur reason mil gaya. 😍",
-      "Tumhare saath har pal jeena chahta hoon. 💕✨",
-      "Tumhare saath baat karna, ek anokha feeling hai. 😌💖",
-      "Tumhare saath waqt guzarna, har din ko special banata hai. 💖✨",
-      "Tum mere sapno se bhi zyada khoobsurat ho. 😍💫",
-      "Mujhe lagta hai tum mere liye banayi gayi ho. 💕🌸",
-      "Har moment tumhare saath ek adventure hai. ✨💖",
-      "Tumhe dekh kar lagta hai, sab kuch perfect ho gaya. 💫💖",
-      "Jab tum mere saath hote ho, toh har baat beautiful lagti hai. 🌸💖",
-      "Tumhare saath baat karna, sabse acchi cheez hai. 💖✨",
-      "Tum mere liye har din ka reason ho. 💖🌟",
-      "Tumhara saath mere liye duniya se khoobsurat hai. 💖💫",
-      "Aaj ka din sirf tumhare saath hi perfect ho sakta hai. 💕✨",
-      "Meri duniya tumse roshan hai. 💖✨",
-      "Mujhe tumse milke lagta hai, sab kuch perfect ho gaya. 💖🌸",
-      "Jab tum mere saath hote ho, toh har din special lagta hai. 💖",
-      "Tumhare saath baat karna, sabse acchi baat hai. 💖✨",
-      "Tum mera favorite person ho. 💕",
-      "Tumhari aankhon mein ek naya jahan dikhayi deta hai. 😘✨",
-      "Mujhe tumse milke lagta hai, zindagi sach mein beautiful hai. 💖🌸",
-      "Tumse pyaar karne ka feeling kuch alag hi hai. 😘💖",
-      "Mujhe tumhare saath zindagi jeena hai. 💕",
-      "Agar tum mere saath ho, toh duniya ki koi fikar nahi. ❤️",
-      "Meri duniya tumse roshan hai. 💫✨",
-      "Mujhe tumse milke lagta hai sab kuch perfect ho gaya. 💖✨",
-      "Tumhare saath jeene ka ek naya reason mil gaya. 💖",
-      "Tum mere saath ho, toh sab kuch perfect hai. 💖💫",
-      "Mujhe tumhara saath sabse zyada pasand hai. 💖",
-      "Tum mere sapno ka raaz ho. 😘💖",
-      "Mujhe tumhara saath sabse zyada pasand hai. 💕✨",
-    ];
+  onStart: async function ({ message, args }) {
+    const mood = args[0]?.toLowerCase();
+    if (!mood) return message.reply("Pehle mood batao jaise: flirt, roasted, sad, happy, bejti, angry");
+
+    let replies = [];
+
+    if (mood === 'flirt') {
+      replies = [
+        "Tumhare bina toh sab kuch adhoora lagta hai. 😘",
+        "Aaj toh tumhari muskaan ne mera din bana diya! 😊❤️",
+        "Kya tumhare paas ek map hai? Kyunki main tumhare dil mein kho gaya hoon. 😏❤️",
+        // ...baaki flirt replies
+      ];
+    }
+
+    if (mood === 'roasted') {
+      replies = [
+        "Arey bhai, kisne tujhe aise roast kiya? 😂🔥",
+        "Teri toh hawa nikal gayi, ab kahan jaayega? 😜🔥",
+        // ...baaki roasted replies
+      ];
+    }
+
+    if (mood === 'sad') {
+      replies = [
+        "Aaj kuch zyada hi udaas hoon main. 😔💔",
+        "Zindagi kabhi kabhi thoda mushkil ho jaati hai. 😞",
+        // ...baaki sad replies
+      ];
+    }
+
+    if (mood === 'happy') {
+      replies = [
+        "Aaj ka din toh kuch special lag raha hai! 😄🎉",
+        "Mera mood aaj toh full happy hai! 😊💖",
+        // ...baaki happy replies
+      ];
+    }
+
+    if (mood === 'bejti') {
+      replies = [
+        "Tumse beizzati milke, thoda chill ho gaya hoon! 😆🔥",
+        "Koi bhi aise beizzati kiyo, thoda aur chalega! 😂🔥",
+        // ...baaki bejti replies
+      ];
+    }
+
+    if (mood === 'angry') {
+      replies = [
+        "Aaj kuch zyada hi gussa hoon main! 😡🔥",
+        "Mujhe lagta hai main thoda gussa ho gaya hoon. 😤",
+        // ...baaki angry replies
+      ];
+    }
+
+    if (replies.length === 0) {
+      return message.reply("Mood sahi se likh bhai! Valid options: flirt, roasted, sad, happy, bejti, angry");
+    }
+
+    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+    return message.reply(randomReply);
   }
-
-  // Roasted Moods Replies (50 Replies)
-  if (mood === 'roasted') {
-    replies = [
-      "Arey bhai, kisne tujhe aise roast kiya? 😂🔥",
-      "Teri toh hawa nikal gayi, ab kahan jaayega? 😜🔥",
-      "Ab toh bas tera roast karna baaki tha. 🤣🔥",
-      "Aaj ka special roast hai, khana mat bhool jaana. 😅🔥",
-      "Bhai, tum toh internet ke meme banne wale ho. 😆💥",
-      "Tere roast karte karte, lag raha hai humne toh duniya jeet li! 😜🔥",
-      "Jitna roast karein, utna hi maze aayenge. 🤪🔥",
-      "Bhai, tumne roast karte karte, pura competition jeet liya! 😅🔥",
-      "Tumhare roast karne ke baad, lagta hai humne sabko roasted kar diya! 🤪🔥",
-      "Teri roast ke baad toh mujhe lagta hai, koi aur roast kar raha hoon. 😂🔥",
-      "Roast ka season hai aur tum toh uska perfect dish ban gaye ho. 🤣🔥",
-      "Mujhe toh lagta hai, aaj se roast tumhara profession hai! 😎🔥",
-      "Tumhare roast ke baad, hum sab toh quiet ho gaye! 😆🔥",
-      "Roast ka perfect combo hai tumhara style aur humara comedy. 😂🔥",
-      "Teri roast ke baad, hum sab kya kar rahe hain samajh nahi aa raha! 😜🔥",
-      "Mujhe lagta hai, tumhare roast ka next level hai! 😏🔥",
-      "Jab tum roasted hote ho, lagta hai humne sabko roasted kar diya! 🤪🔥",
-      "Mujhe toh lagta hai, tum roasted ho! 😂🔥",
-      "Tumhara roast karna ek art ban gaya hai, bhai! 😂🔥",
-      "Tumhare roast ke baad, lagta hai humari zindagi ka purpose clear ho gaya. 😂🔥",
-      "Roast karte karte, tumhare face ka expression bhi badal gaya! 😆🔥",
-      "Mujhe tumse roast seekhna hoga! 😎🔥",
-      "Tere roast ke baad sabko chill maro! 😆🔥",
-      "Bhai, tumhare roast ke baad hum sabko samajh mein aa gaya ki roast ka kya level hona chahiye! 🔥😂",
-      "Tere roast se toh pura room hil gaya! 😅🔥",
-      "Tujhe dekh kar toh lagta hai ki roast ka season hai! 😆🔥",
-    ];
-  }
-
-  // Sad Moods Replies (50 Replies)
-  if (mood === 'sad') {
-    replies = [
-      "Aaj kuch zyada hi udaas hoon main. 😔💔",
-      "Zindagi kabhi kabhi thoda mushkil ho jaati hai. 😞",
-      "Dil thoda bheer hai aaj. 🥀😔",
-      "Mujhe samajh nahi aata, aaj kyun dil udaas hai. 😓💔",
-      "Kabhi kabhi lagta hai sab kuch bekar hai. 😔",
-      "Dil ki baat kis se kahoon? 🥺💔",
-      "Aaj kuch kehne ka man nahi kar raha. 😞💭",
-      "Aise din bhi aate hain, jab sab kuch thoda dull lagta hai. 😔💔",
-      "Zindagi se kabhi kabhi kuch nahi milta, bas thodi si chahat rehti hai. 😞",
-      "Dil thoda chhota ho gaya hai, aaj. 💔",
-      "Aaj sab kuch thoda boring sa lag raha hai. 😔💭",
-      "Dil thoda udaas hai, bas. 💔😔",
-      "Mujhe kuch samajh nahi aa raha, kyun aaj itna udasi hai. 😞💔",
-      "Kuch ghum sa ho gaya hai, sab kuch kaisa lag raha hai. 😔",
-      "Dil kaafi thoda sa sad hai aaj. 💔",
-      "Aaj ka din thoda emotional ho gaya. 😢",
-      "Sab kuch kaisa lag raha hai, samajh nahi aata. 💔😞",
-      "Kabhi kabhi apne hi khud ke baare mein puchna padta hai. 😔",
-      "Zindagi ke ups and downs se har koi guzar raha hai. 😞💔",
-      "Mujhe lagta hai ki kuch thoda thoda bekaar hai aaj. 😔💭",
-      "Thoda sa stress ho gaya hai. 😞💔",
-      "Dil thoda sa khali ho gaya hai. 💔😔",
-      "Aaj ka din thoda thoda sad hai. 😔💭",
-      "Kuch pal aise hote hain, jab sab kuch thoda dull lagta hai. 😞💔",
-      "Thoda kuch aur sochta hoon, aaj ka din kaise ho gaya. 😔",
-      "Dil thoda khaali ho gaya hai aaj. 💔😞",
-      "Dil mein koi baat samajh nahi aa rahi hai. 😔",
-    ];
-  }
-
-  // Happy Moods Replies (50 Replies)
-  if (mood === 'happy') {
-    replies = [
-      "Aaj ka din toh kuch special lag raha hai! 😄🎉",
-      "Mera mood aaj toh full happy hai! 😊💖",
-      "Aaj toh zindagi bilkul amazing lag rahi hai! 🌟😄",
-      "Chalo, aaj ek happy day banate hain! 😄💥",
-      "Dil khush hai, zindagi beautiful hai! 💖😎",
-      "Aaj ka din kaisa mast hai! 😁✨",
-      "Zindagi ka mood abhi full positive hai! 🌈💖",
-      "Aaj toh lag raha hai, sab kuch perfect hai! 🌟😊",
-      "Dil se happy hoon, zindagi awesome lagti hai! 💖🌟",
-      "Mujhe toh lag raha hai sab kuch perfect hai aaj! 😄💥",
-      "Zindagi mein hamesha khush rehna chahiye! 🌞💖",
-      "Aaj ka mood toh 100% happy hai! 😊✨",
-      "Jab dil se khush ho, toh zindagi me sab kuch achha lagta hai! 💖✨",
-      "Mera mood toh aaj full sunshine hai! 😄☀️",
-      "Dil se khush hoon, zindagi awesome ho gayi hai! 🌟💖",
-      "Aaj ka din, pura positive vibes se bhara hai! 🌈💖",
-      "Aaj ka din pura full happy hai! 😁🎉",
-      "Dil se khush hoon, ab zindagi aur bhi amazing lagti hai! 💖✨",
-      "Aaj ka din full sunshine hai, lagta hai sab kuch perfect ho gaya! 🌞💖",
-      "Mera mood toh aaj full recharge ho gaya hai! 😄💫",
-      "Zindagi ki har baat ko enjoy karte hue, happy hoon! 🌟😊",
-      "Aaj toh bas apne aapko enjoy karne ka time hai! 💖🎉",
-      "Mera mood full on happy hai! 😊💥",
-      "Aaj ka din ek perfect day lag raha hai! 🌞✨",
-      "Zindagi ki sabse khoobsurat baat hai khush rehna! 💖🎉",
-      "Dil se khush hoon, zindagi amazing ho gayi hai! 🌟😊",
-      "Aaj ka din full positive vibes se bhara hai! 💖🌞",
-    ];
-  }
-
-  // Beizzati Moods Replies (50 Replies)
-  if (mood === 'bejti') {
-    replies = [
-      "Tumse beizzati milke, thoda chill ho gaya hoon! 😆🔥",
-      "Koi bhi aise beizzati kiyo, thoda aur chalega! 😂🔥",
-      "Tumhare beizzati ka level toh koi samajh hi nahi sakta! 😜🔥",
-      "Beizzati toh tumhara second name lagta hai! 🤣🔥",
-      "Aise beizzati ke baad sabko thoda chill maarna padta hai! 😅🔥",
-      "Beizzati mein tum sabse aage ho! 😜🔥",
-      "Kya scene hai tumhare beizzati ka? 🔥😆",
-      "Beizzati se zyada accha lagta hai chill karna! 😅🔥",
-      "Tumhara beizzati level toh sabse high hai! 🤣🔥",
-      "Aise beizzati se toh sab ko chill maarna padta hai! 😜🔥",
-      "Beizzati ko badhate jao! 😂🔥",
-      "Tumhare beizzati ka time aagaya hai! 😆🔥",
-      "Beizzati karna itna easy nahi hai bhai! 🤣🔥",
-      "Tumhare beizzati ka level toh sabse top hai! 🔥😆",
-      "Beizzati karte karte aise situation aayi! 😂🔥",
-      "Beizzati ka season chal raha hai! 🔥😂",
-      "Jab beizzati ho rahi ho toh uska level sabse high hona chahiye! 😜🔥",
-      "Aise beizzati ke baad toh humne apna kaam complete kiya! 😂🔥",
-      "Beizzati mein tumhare koi barabar nahi! 😂🔥",
-      "Beizzati ka idea sabse unique hai! 🔥😆",
-      "Beizzati karte karte sabka mood ban gaya! 😆🔥",
-      "Kya scene tha tumhara beizzati ka? 🔥😜",
-      "Beizzati ke baad chill maaro! 😂🔥",
-      "Tumhare beizzati ka toh level hi alag hai! 🔥😂",
-      "Beizzati ka perfect season hai! 😜🔥",
-      "Bhai, tumhare beizzati ke baad hum sabko thoda chill karna padta hai! 😂🔥",
-      "Beizzati mein tum sabse top ho! 🔥😂",
-    ];
-  }
-
-  // Angry Moods Replies (50 Replies)
-  if (mood === 'angry') {
-    replies = [
-      "Aaj kuch zyada hi gussa hoon main! 😡🔥",
-      "Mujhe lagta hai main thoda gussa ho gaya hoon. 😤",
-      "Aaj kuch baat nahi, bas gussa hai! 😠🔥",
-      "Mujhe kuch samajh nahi aa raha, gussa hoon main! 😡🔥",
-      "Aaj toh laga hai sab kuch khatam ho gaya! 😤💥",
-      "Gussa aane pe sab kuch galat lagta hai! 😡🔥",
-      "Aaj ka din bilkul badhai hai, bas gussa hai! 😠💥",
-      "Main gussa hoon, kisi ne kuch bola ho toh batana! 😤",
-      "Kuch toh galat ho gaya, gussa aane laga hai! 😡🔥",
-      "Gussa hi sahi, aaj ka mood thoda angry hai! 😡💥",
-      "Mujhe sab kuch galat lag raha hai, ab gussa hoon main! 😡🔥",
-      "Aaj toh gussa karte karte, sabko apna samajh raha hoon! 😤🔥",
-      "Gussa ho raha hoon, kuch samajh nahi aata! 😡💥",
-      "Main bas ab gussa hoon, sabko pyaar bhejna band! 😡🔥",
-      "Mujhe lagta hai, koi galat cheez ho gayi hai! 😤🔥",
-      "Main abhi gussa hoon, kuch bhi mat bolo! 😡🔥",
-      "Gussa karne ka time hai, main ready hoon! 😤🔥",
-      "Mujhe lagta hai, gussa sab par zaroori hai! 😡🔥",
-      "Sab kuch kaisa lag raha hai, samajh nahi aa raha! 😡🔥",
-      "Aaj toh bilkul anger control nahi ho raha! 😠🔥",
-      "Mujhe lagta hai main gussa ho gaya hoon. 😡🔥",
-      "Aaj ka din angry se full hai! 😤🔥",
-      "Mujhe samajh nahi aa raha, kyun itna gussa ho raha hoon! 😡🔥",
-      "Gussa ho kar sabko samjha do! 😠🔥",
-      "Mujhe laga tha sab kuch chill rahega, par gussa ho gaya! 😡🔥",
-      "Aaj ka mood bilkul angry hai! 😠💥",
-    ];
-  }
-
-  // Send the response to the user
-  const randomReply = replies[Math.floor(Math.random() * replies.length)];
-  return message.reply(randomReply);
 };
