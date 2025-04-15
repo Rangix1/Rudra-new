@@ -4,30 +4,24 @@ module.exports = {
 	config: {
 		name: "restart",
 		version: "1.0",
-		author: "NTKhang",
+		author: "Rudra", // Author set to Rudra
 		countDown: 5,
 		role: 2,
 		shortDescription: {
-			vi: "Khởi động lại bot",
-			en: "Restart bot"
+			en: "Restart the bot",
 		},
 		longDescription: {
-			vi: "Khởi động lại bot",
-			en: "Restart bot"
+			en: "Restart the bot",
 		},
 		category: "Owner",
 		guide: {
-			vi: "   {pn}: Khởi động lại bot",
-			en: "   {pn}: Restart bot"
+			en: "   {pn}: Restart the bot",
 		}
 	},
 
 	langs: {
-		vi: {
-			restartting: "🔄 | Đang khởi động lại bot..."
-		},
 		en: {
-			restartting: "🔄 | Restarting bot..."
+			restartting: "🔄 | Restarting the bot..."
 		}
 	},
 
@@ -35,15 +29,21 @@ module.exports = {
 		const pathFile = `${__dirname}/tmp/restart.txt`;
 		if (fs.existsSync(pathFile)) {
 			const [tid, time] = fs.readFileSync(pathFile, "utf-8").split(" ");
-			api.sendMessage(`✅ | Bot restarted\n⏰ | Time: ${(Date.now() - time) / 1000}s`, tid);
-			fs.unlinkSync(pathFile);
+			api.sendMessage(`✅ | Bot has been restarted\n⏰ | Time: ${(Date.now() - time) / 1000}s`, tid);
+			fs.unlinkSync(pathFile); // Deleting the file after restart
 		}
 	},
 
 	onStart: async function ({ message, event, getLang }) {
 		const pathFile = `${__dirname}/tmp/restart.txt`;
+
+		// Write thread ID and time into restart.txt
 		fs.writeFileSync(pathFile, `${event.threadID} ${Date.now()}`);
+
+		// Sending restart message
 		await message.reply(getLang("restartting"));
-		process.exit(2);
+
+		// Restarting the bot using process.exit(0)
+		process.exit(0);
 	}
 };
