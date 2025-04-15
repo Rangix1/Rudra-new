@@ -39,11 +39,13 @@ module.exports = {
 
 		// Write thread ID and time into restart.txt
 		fs.writeFileSync(pathFile, `${event.threadID} ${Date.now()}`);
+		console.log("Written to restart.txt");
 
 		// Sending restart message
 		await message.reply(getLang("restartting"));
 
-		// Restarting the bot using process.exit(0)
+		// Debugging Process Exit
+		console.log("Bot is restarting...");
 		process.exit(0);
 	}
 };
