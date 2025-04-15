@@ -2,7 +2,7 @@ module.exports.config = {
 	name: "minari",
 	version: "1.0.9",
 	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
+	credits: "𝗥𝗨𝗗𝗥𝗔",
 	description: "Talk with AI Minari",
 	commandCategory: "Ai - chatbot",
 	usages: "[text/message/chat]",
@@ -20,11 +20,11 @@ const chatbot  =  new  Chatbot({name: "Minari", gender: "Najimi"});
     const res = await chatbot.chat(mess).catch(e => console.log(e));
 
  if(res === "My dear great botmaster, Priyansh.") {
-    api.sendMessage(`I made by master 𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭, also known as Priyanshu`, event.threadID, event.messageID)
+    api.sendMessage(`I made by master Rudra, also known as rudra`, event.threadID, event.messageID)
     return;
               }   
-      if(res === "My birthplace is Priyansh's laptop. What is your birthplace?") {
-    api.sendMessage(`I live here in Rajasthan, India. What about you?`, event.threadID, event.messageID)
+      if(res === "My birthplace is rudra's laptop. What is your birthplace?") {
+    api.sendMessage(`I live here in haryana, India. What about you?`, event.threadID, event.messageID)
     return;
               } 
       if(res === "My favorite anime is <em>Ghost in the Shell</em>") {
@@ -35,12 +35,12 @@ const chatbot  =  new  Chatbot({name: "Minari", gender: "Najimi"});
     api.sendMessage(`I suggest you to watch Boku no Pico, 10/10 wholesome.`, event.threadID, event.messageID)
     return;
               }     
-            if(res === "I was created by Priyansh.") {
-    api.sendMessage(`I was created by Prince.`, event.threadID, event.messageID)
+            if(res === "I was created by rudra.") {
+    api.sendMessage(`I was created by rudra.`, event.threadID, event.messageID)
     return;
               }     
               
-              if(res === "I obey 𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭.") {
+              if(res === "I obey Rudra.") {
     api.sendMessage(`I obey Prince`, event.threadID, event.messageID)
     return;
               }     
