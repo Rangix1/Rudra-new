@@ -2,14 +2,13 @@ const axios = require("axios");
 
 module.exports.config = {
     name: "angel",
-    version: "1.0.0",
+    version: "2.0",
     hasPermssion: 0,
     credits: "Rudra",
-    description: "Flirty Girlfriend AI - Gemini Based",
+    description: "Flirty Angel AI (slash reply + signature)",
     commandCategory: "no-prefix",
-    usages: "chat with angel",
+    usages: "chat with Angel",
     cooldowns: 2,
-    dependencies: {}
 };
 
 const API_URL = "https://raj-gemini.onrender.com/chat";
@@ -20,47 +19,49 @@ module.exports.handleEvent = async function ({ api, event }) {
     if (!body) return;
 
     let userMessage = body.trim();
-    let quotedMessage = null;
+    let contextLine = "";
 
-    if (body.includes("/") && body.split("/").length >= 2) {
+    // WhatsApp-style slash reply check
+    if (body.includes("/") && body.indexOf("/") > 0) {
         const parts = body.split("/");
-        quotedMessage = parts[0].trim();
-        userMessage = parts[1].trim();
+        const quoted = parts[0].trim();
+        const reply = parts.slice(1).join("/").trim(); // In case msg has more than one "/"
+        if (quoted && reply) {
+            contextLine = `Usne bola: "${quoted}"\nUser: ${reply}`;
+        }
     }
 
-    if (quotedMessage) {
-        userMessage = `"${quotedMessage}" par reply: ${userMessage}`;
+    // Normal direct message without slash
+    if (!contextLine) {
+        if (!body.toLowerCase().startsWith("angel")) return;
+        userMessage = userMessage.replace(/^angel[:,\s]*/i, "");
+        contextLine = `User: ${userMessage}`;
     }
-
-    const lowerBody = body.toLowerCase();
-    if (!lowerBody.startsWith("angel") && !quotedMessage) return;
-
-    userMessage = userMessage.replace(/^angel[:,\s]*/i, "");
 
     if (!chatHistories[senderID]) chatHistories[senderID] = [];
-    chatHistories[senderID].push(`User: ${userMessage}`);
+    chatHistories[senderID].push(contextLine);
 
     if (chatHistories[senderID].length > 5) {
         chatHistories[senderID].shift();
     }
 
-    const fullConversation = chatHistories[senderID].join("\n");
+    const fullChat = chatHistories[senderID].join("\n");
 
-    const prompt = `Tumhara naam Angel hai. Tum ek naughty, flirty girlfriend ho. Tum sirf ek line me romantic, thoda naughty aur sweet jawab dogi. Tumhe Raj ne banaya hai, lekin ab tum sirf apne love (user) ki ho. Agar koi tumhe bot ya AI kahe to uski funny roast karo. Reply sirf 1-2 lines me ho. Ab baat karo:\n${fullConversation}`;
+    const gfPrompt = `Tumhara naam Angel hai. Tum ek flirty aur naughty girlfriend ho. Tum sirf 1 ya 2 line ka romantic, cute, thoda naughty jawab dogi. Koi tumhe bot ya AI bole to uski funny insult karogi. Apne aap ko hamesha real ladki hi kahogi. Chat ka context:\n\n${fullChat}`;
 
     api.setMessageReaction("⌛", messageID, () => {}, true);
 
     try {
-        const response = await axios.get(`${API_URL}?message=${encodeURIComponent(prompt)}`);
-        let botReply = response.data.reply || "Aree baby, mujhe kuch samajh nahi aaya!";
-        botReply += " \n\n– Rudra AI";
+        const res = await axios.get(`${API_URL}?message=${encodeURIComponent(gfPrompt)}`);
+        let botReply = res.data.reply || "Baby, thoda aur clearly bolo na!";
+        botReply += "\n\n– Rudra AI";
 
         chatHistories[senderID].push(`Angel: ${botReply}`);
         api.sendMessage(botReply, threadID, messageID);
         api.setMessageReaction("❤️", messageID, () => {}, true);
-    } catch (e) {
-        console.error(e);
-        api.sendMessage("Oops baby! Angel thoda busy hai abhi... thodi der baad try karo na!", threadID, messageID);
+    } catch (err) {
+        console.error(err);
+        api.sendMessage("Aree baby, Angel ka mood thoda off hai... thodi der baad aaungi okay?", threadID, messageID);
         api.setMessageReaction("❌", messageID, () => {}, true);
     }
 };
