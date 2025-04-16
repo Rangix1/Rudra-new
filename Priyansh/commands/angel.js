@@ -2,78 +2,67 @@ const axios = require("axios");
 
 module.exports.config = {
     name: "angel",
-    version: "1.0.9",
+    version: "1.0.0",
     hasPermssion: 0,
-    credits: "Raj",
-    description: "Gemini AI - Cute Girlfriend Style",
-    commandCategory: "ai",
-    usages: "[ask]",
+    credits: "Rudra",
+    description: "Flirty Girlfriend AI - Gemini Based",
+    commandCategory: "no-prefix",
+    usages: "chat with angel",
     cooldowns: 2,
-    dependencies: {
-        "axios": ""
-    }
+    dependencies: {}
 };
 
-// API URL (Tumhara Gemini Backend)
 const API_URL = "https://raj-gemini.onrender.com/chat";
-
-// User history and auto-reply state
 const chatHistories = {};
 
-module.exports.run = async function ({ api, event, args }) {
-    const { threadID, messageID, senderID, messageReply } = event;
-    let userMessage = args.join(" ");
+module.exports.handleEvent = async function ({ api, event }) {
+    const { threadID, messageID, senderID, body, messageReply } = event;
+    if (!body) return;
 
-    // If no message is entered, return
-    if (!userMessage) return api.sendMessage("Arre baby, kuch to bolo! 😘", threadID, messageID);
+    let userMessage = body.trim();
+    let quotedMessage = null;
 
-    // Store conversation
-    if (!chatHistories[senderID]) {
-        chatHistories[senderID] = [];
+    if (body.includes("/") && body.split("/").length >= 2) {
+        const parts = body.split("/");
+        quotedMessage = parts[0].trim();
+        userMessage = parts[1].trim();
     }
 
-    // If replying to bot message, continue context
-    const isReplyingToAI = messageReply && messageReply.senderID === api.getCurrentUserID();
-    if (isReplyingToAI) {
-        userMessage = messageReply.body + "\nUser: " + userMessage;
-        chatHistories[senderID].push(`User: ${userMessage}`);
-    } else {
-        chatHistories[senderID].push(`User: ${userMessage}`);
+    if (quotedMessage) {
+        userMessage = `"${quotedMessage}" par reply: ${userMessage}`;
     }
 
-    // Keep only last 5 messages
+    const lowerBody = body.toLowerCase();
+    if (!lowerBody.startsWith("angel") && !quotedMessage) return;
+
+    userMessage = userMessage.replace(/^angel[:,\s]*/i, "");
+
+    if (!chatHistories[senderID]) chatHistories[senderID] = [];
+    chatHistories[senderID].push(`User: ${userMessage}`);
+
     if (chatHistories[senderID].length > 5) {
         chatHistories[senderID].shift();
     }
 
     const fullConversation = chatHistories[senderID].join("\n");
 
-    // Girlfriend Style Prompt
-    const gfPrompt = `Tumhara naam Angel hai, Tum ek girlfriend ki trah baat karti ho.. Koi agar batdmizi karta hai tb uski ache se insult bhi karogi.. Lekin sab msti ke liye hoga .. Koi puchta hai tumhe kisne banaya? To bola Raj ne banaya hai mujhe.. Wo messenger bots banata hai.. Tum har message ka jawab sirf 1 2 line me dogi.. jitna pucha jayega sirf utna bolna hai.. Kisi baat ki unnecessary info nahi deni hai, tum apne aap ko insaan hi kahogi koi tumko bot ya AI bole to usko roast krna funny tarike se😁, and act as a real girlfriend. Be fun, loving, and a little naughty.keep reply maximum 1 lines only, no bracket replys.Now continue the chat:\n\n${fullConversation}`;
+    const prompt = `Tumhara naam Angel hai. Tum ek naughty, flirty girlfriend ho. Tum sirf ek line me romantic, thoda naughty aur sweet jawab dogi. Tumhe Raj ne banaya hai, lekin ab tum sirf apne love (user) ki ho. Agar koi tumhe bot ya AI kahe to uski funny roast karo. Reply sirf 1-2 lines me ho. Ab baat karo:\n${fullConversation}`;
 
-    // Typing reaction
     api.setMessageReaction("⌛", messageID, () => {}, true);
 
     try {
-        const response = await axios.get(`${API_URL}?message=${encodeURIComponent(gfPrompt)}`);
-        let botReply = response.data.reply || "Uff! Mujhe samajh nahi aaya baby! 😕";
+        const response = await axios.get(`${API_URL}?message=${encodeURIComponent(prompt)}`);
+        let botReply = response.data.reply || "Aree baby, mujhe kuch samajh nahi aaya!";
+        botReply += " \n\n– Rudra AI";
 
-        chatHistories[senderID].push(` ${botReply}`);
-
+        chatHistories[senderID].push(`Angel: ${botReply}`);
         api.sendMessage(botReply, threadID, messageID);
-        api.setMessageReaction("✅", messageID, () => {}, true);
-    } catch (error) {
-        console.error("Error:", error);
-        api.sendMessage("Oops baby! 😔 me thoda confuse ho gayi… thodi der baad try karo na please! 💋", threadID, messageID);
+        api.setMessageReaction("❤️", messageID, () => {}, true);
+    } catch (e) {
+        console.error(e);
+        api.sendMessage("Oops baby! Angel thoda busy hai abhi... thodi der baad try karo na!", threadID, messageID);
         api.setMessageReaction("❌", messageID, () => {}, true);
     }
 };
 
-module.exports.handleEvent = async function ({ api, event }) {
-    const { threadID, messageID, senderID, body, messageReply } = event;
-
-    if (body.toLowerCase().indexOf("angel") === 0) {
-        const args = body.split(" ");
-        module.exports.run({ api, event, args });
-    }
-};
+module.exports.run = () => {};
