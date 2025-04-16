@@ -11,9 +11,18 @@ const config = {
   cooldowns: 0
 };
 
-const handleEvent = async function ({ api, event, client, __GLOBAL }) {
+// Set a timeout for the API request
+const axiosInstance = axios.create({
+  timeout: 5000 // Timeout in milliseconds
+});
 
-  if (event.body.indexOf("Babu") === 0 || event.body.indexOf("Baby") === 0 || event.body.indexOf("BABU") === 0 || event.body.indexOf("BABY") === 0) {
+const handleEvent = async function ({ api, event, client, __GLOBAL }) {
+  if (
+    event.body.indexOf("Babu") === 0 ||
+    event.body.indexOf("Baby") === 0 ||
+    event.body.indexOf("BABU") === 0 ||
+    event.body.indexOf("BABY") === 0
+  ) {
     const { threadID, messageID, senderID } = event;
     const input = event.body;
     const message = input.split(" ");
@@ -27,13 +36,25 @@ const handleEvent = async function ({ api, event, client, __GLOBAL }) {
         const text = message.slice(1).join(" "); // Join the remaining parts of the message
         const encodedText = encodeURIComponent(text);
 
-        const ris = await axios.get(`https://priyansh-ai.onrender.com/ai?prompt=${encodedText}&uid=${senderID}&apikey=priyansh-here`);
+        // Use axios instance for API call with a timeout
+        const ris = await axiosInstance.get(
+          `https://priyansh-ai.onrender.com/ai?prompt=${encodedText}&uid=${senderID}&apikey=priyansh-here`
+        );
         const resultai = ris.data.response;
 
         api.sendMessage(`${resultai}\n༺═──༻`, threadID);
       } catch (err) {
         console.error(err);
-        api.sendMessage("❌ 𝙽𝚘 𝚁𝚎𝚜𝚙𝚘𝚗𝚜𝚎 𝚁𝚎𝚌𝚎𝚒𝚟𝚎𝚍 𝚏𝚛𝚘𝚖 𝚝𝚑𝚎 𝚜𝚎𝚛𝚟𝚎𝚛: " + err + " 🥲", threadID);
+        if (err.response) {
+          // If error is related to response
+          api.sendMessage(`❌ Server Error: ${err.response.data.error}`, threadID);
+        } else if (err.request) {
+          // If request is made but no response received
+          api.sendMessage("❌ Network Error: No response from the server", threadID);
+        } else {
+          // Generic error
+          api.sendMessage("❌ Error: Something went wrong. Please try again later.", threadID);
+        }
       }
     }
   }
