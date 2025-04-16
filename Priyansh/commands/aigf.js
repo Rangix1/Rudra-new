@@ -1,5 +1,5 @@
 module.exports.config = {
-  name: "misha",
+  name: "aigf",
   version: "1.0",
   author: "Rudra",
   countDown: 5,
