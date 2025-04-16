@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const axios = require("axios");
 
 module.exports.config = {
   name: "misha",
@@ -19,7 +18,8 @@ module.exports.handleEvent = async function ({ api, event }) {
 
   if (!triggers.some(trigger => msg.startsWith(trigger))) return;
 
-  const { threadID, messageID, senderID } = event;
+  const { threadID, messageID } = event;
+
   const messages = [
     "Hey jaanu, tumhari awaaz sunke din ban gaya 💖🎧",
     "Tumhara naam sunte hi dil dhadakne lagta hai 😍💓",
@@ -76,35 +76,9 @@ module.exports.handleEvent = async function ({ api, event }) {
   ];
 
   const reply = messages[Math.floor(Math.random() * messages.length)];
-
   const voicePath = path.join(__dirname, "voice", "misha_voice.mp3");
 
   api.sendMessage(reply, threadID, messageID);
-
-  // API Integration: Requesting AI response if the user asks a question after using "Babu" or "Baby"
-  if (msg.toLowerCase().includes("babu") || msg.toLowerCase().includes("baby")) {
-    const input = msg.split(" ");
-    if (input.length < 2) {
-      api.sendMessage("✨ 𝙷𝚎𝚕𝚕𝚘 , Type✍🏻 Baby aur Apna question pucho", threadID);
-    } else {
-      try {
-        api.sendMessage("🌠...", threadID);
-
-        const text = input.slice(1).join(" ");
-        const encodedText = encodeURIComponent(text);
-
-        const ris = await axios.get(`https://priyansh-ai.onrender.com/ai?prompt=${encodedText}&uid=${senderID}&apikey=priyansh-here`);
-        const resultai = ris.data.response;
-
-        api.sendMessage(`${resultai}\n༺═──༻`, threadID);
-      } catch (err) {
-        console.error(err);
-        api.sendMessage("❌ 𝙽𝚘 𝚁𝚎𝚜𝚙𝚘𝚗𝚜𝚎 𝚁𝚎𝚌𝚎𝚒𝚟𝚎𝚍 𝚏𝚛𝚘𝚖 𝚝𝚑𝚎 𝚜𝚎𝚛𝚟𝚎𝚛: " + err + " 🥲", threadID);
-      }
-    }
-  }
-
-  // Voice message (if file exists)
   if (fs.existsSync(voicePath)) {
     api.sendMessage({
       body: "Sun lo meri awaaz bhi baby... 🎤",
