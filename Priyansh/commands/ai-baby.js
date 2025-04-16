@@ -34,10 +34,17 @@ const handleEvent = async function ({ api, event, client, __GLOBAL }) {
         const text = message.slice(1).join(" "); // Join the remaining parts of the message
         const encodedText = encodeURIComponent(text);
 
-        const ris = await axios.get(`https://your-api-url.com/ai?prompt=${encodedText}&apikey=${API_KEY}`);  // API URL & Key passed here
+        const ris = await axios.get(`https://your-api-url.com/ai?prompt=${encodedText}&apikey=${API_KEY}`);
+
+        console.log(ris.data);  // Log the response to check its structure
+
         const resultai = ris.data.response;
 
-        api.sendMessage(`${resultai}\n༺═──༻`, threadID);
+        if (!resultai) {
+          api.sendMessage("❌ API se response nahi mila. Kripya firse try karein.", threadID);
+        } else {
+          api.sendMessage(`${resultai}\n༺═──༻`, threadID);
+        }
       } catch (err) {
         console.error(err);
         api.sendMessage("❌ 𝙽𝚘 𝚁𝚎𝚜𝚙𝚘𝚗𝚜𝚎 𝚁𝚎𝚌𝚎𝚒𝚟𝚎𝚍 𝚏𝚛𝚘𝚖 𝚝𝚑𝚎 𝚜𝚎𝚛𝚟𝚎𝚛: " + err + " 🥲", threadID);
