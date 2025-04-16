@@ -11,8 +11,16 @@ const config = {
   cooldowns: 0
 };
 
+const API_KEY = "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";  // Put your API key here
+
 const handleEvent = async function ({ api, event, client, __GLOBAL }) {
-  if (event.body.indexOf("Babu") === 0 || event.body.indexOf("Baby") === 0 || event.body.indexOf("BABU") === 0 || event.body.indexOf("BABY") === 0) {
+
+  if (
+    event.body.indexOf("Babu") === 0 ||
+    event.body.indexOf("Baby") === 0 ||
+    event.body.indexOf("BABU") === 0 ||
+    event.body.indexOf("BABY") === 0
+  ) {
     const { threadID, messageID, senderID } = event;
     const input = event.body;
     const message = input.split(" ");
@@ -23,22 +31,11 @@ const handleEvent = async function ({ api, event, client, __GLOBAL }) {
       try {
         api.sendMessage("🌠...", threadID);
 
-        const text = message.slice(1).join(" ");
+        const text = message.slice(1).join(" "); // Join the remaining parts of the message
         const encodedText = encodeURIComponent(text);
 
-        // Using OpenAI GPT-3 API (Replace with your API key)
-        const response = await axios.post("https://api.openai.com/v1/completions", {
-          model: "text-davinci-003", // Change this to any GPT model
-          prompt: text,
-          max_tokens: 100,
-          temperature: 0.7
-        }, {
-          headers: {
-            "Authorization": `Bearer YOUR_OPENAI_API_KEY`
-          }
-        });
-
-        const resultai = response.data.choices[0].text;
+        const ris = await axios.get(`https://your-api-url.com/ai?prompt=${encodedText}&apikey=${API_KEY}`);  // API URL & Key passed here
+        const resultai = ris.data.response;
 
         api.sendMessage(`${resultai}\n༺═──༻`, threadID);
       } catch (err) {
