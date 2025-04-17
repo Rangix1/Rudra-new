@@ -1,55 +1,43 @@
 const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
 
 module.exports.config = {
   name: "mp3",
-  version: "1.0",
+  version: "1.0.0",
   hasPermssion: 0,
   credits: "Rudra",
-  description: "Download MP3 song by name",
-  commandCategory: "media",
-  usages: "[song name]",
-  cooldowns: 5,
+  description: "Get MP3 song by name",
+  commandCategory: "music",
+  usages: "mp3 [song name]",
+  cooldowns: 5
 };
 
-module.exports.run = async ({ api, event, args }) => {
-  const song = args.join(" ");
-  if (!song) return api.sendMessage("Bhai song ka naam toh de!", event.threadID, event.messageID);
+module.exports.run = async function ({ api, event, args }) {
+  const songName = args.join(" ");
+  const { threadID, messageID } = event;
+
+  if (!songName) {
+    return api.sendMessage("Please enter the name of the song!\n\nExample: mp3 Tumse hi", threadID, messageID);
+  }
 
   try {
-    const res = await axios.get(`https://api.guruapi.tech/api/dlsong?name=${encodeURIComponent(song)}`);
-    const url = res.data.url;
-    if (!url) return api.sendMessage("MP3 fetch nahi hua bhai, naam check karo.", event.threadID, event.messageID);
+    const res = await axios.get(`https://vihangayt.me/download/ytmp3?query=${encodeURIComponent(songName)}`);
 
-    const mp3Path = path.join(__dirname, "cache", `song.mp3`);
-    const writer = fs.createWriteStream(mp3Path);
+    if (!res.data || !res.data.data || !res.data.data.url) {
+      return api.sendMessage("MP3 fetch nahi hua bhai, naam ya API check karo.", threadID, messageID);
+    }
 
-    const response = await axios({
-      url,
-      method: "GET",
-      responseType: "stream",
-    });
+    const mp3Url = res.data.data.url;
 
-    response.data.pipe(writer);
+    return api.sendMessage(
+      {
+        body: `✅ Song found: ${songName}\n\n🎧 Download MP3:\n${mp3Url}`,
+      },
+      threadID,
+      messageID
+    );
 
-    writer.on("finish", () => {
-      api.sendMessage(
-        {
-          body: `Lo bhai tumhara gaana: ${song}`,
-          attachment: fs.createReadStream(mp3Path),
-        },
-        event.threadID,
-        () => fs.unlinkSync(mp3Path),
-        event.messageID
-      );
-    });
-
-    writer.on("error", () => {
-      api.sendMessage("Download mein error aaya bhai.", event.threadID, event.messageID);
-    });
   } catch (err) {
-    console.log(err);
-    api.sendMessage("Error aa gaya bhai, ya toh song nahi mila ya API down hai.", event.threadID, event.messageID);
+    console.log("MP3 Error:", err);
+    return api.sendMessage("Error aayi bhai, song laate time kuch dikkat ho gayi.", threadID, messageID);
   }
 };
