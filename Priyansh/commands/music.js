@@ -8,89 +8,98 @@ function deleteAfterTimeout(filePath, timeout = 10000) {
   setTimeout(() => {
     if (fs.existsSync(filePath)) {
       fs.unlink(filePath, (err) => {
-        if (!err) console.log(`✅ Deleted: ${filePath}`);
+        if (!err) {
+          console.log(`✅ Deleted file: ${filePath}`);
+        } else {
+          console.error(`❌ Error deleting file: ${err.message}`);
+        }
       });
     }
   }, timeout);
 }
 
-module.exports.config = {
-  name: "music",
-  version: "1.0.1",
-  hasPermssion: 0,
-  credits: "Modified by ChatGPT",
-  description: "Download YouTube audio/video by name",
-  commandCategory: "media",
-  usages: "[song name] [video (optional)]",
-  cooldowns: 3,
-};
+module.exports = {
+  config: {
+    name: "music",
+    version: "2.1.0",
+    hasPermssion: 0,
+    credits: "Lazer + Mirrykal",
+    description: "Download YouTube song or video (Fast Optimized)",
+    commandCategory: "Media",
+    usages: "[songName] [optional: video]",
+    cooldowns: 3,
+  },
 
-module.exports.run = async function ({ api, event, args }) {
-  if (args.length === 0) {
-    return api.sendMessage("❗ Gaane ka naam likho!", event.threadID);
-  }
-
-  const mediaType = args[args.length - 1].toLowerCase() === "video" ? "video" : "audio";
-  const songName = mediaType === "video" ? args.slice(0, -1).join(" ") : args.join(" ");
-
-  const waitMsg = await api.sendMessage(`🔍 "${songName}" dhoondh rahi hoon...`, event.threadID, null, event.messageID);
-
-  try {
-    const searchResults = await ytSearch(songName);
-    if (!searchResults || !searchResults.videos.length) {
-      throw new Error("Gaana nahi mila. Naam check karo.");
+  run: async function ({ api, event, args }) {
+    if (args.length === 0) {
+      return api.sendMessage("⚠️ Bhai gaane ka naam likh to sahi! 😒", event.threadID);
     }
 
-    const top = searchResults.videos[0];
-    const videoUrl = `https://www.youtube.com/watch?v=${top.videoId}`;
-    const safeTitle = top.title.replace(/[^a-zA-Z0-9]/g, "_");
-    const thumbPath = __dirname + `/cache/${safeTitle}.jpg`;
+    const mediaType = args[args.length - 1].toLowerCase() === "video" ? "video" : "audio";
+    const songName = mediaType === "video" ? args.slice(0, -1).join(" ") : args.join(" ");
 
-    const thumbnail = fs.createWriteStream(thumbPath);
-    await new Promise((resolve, reject) => {
-      https.get(top.thumbnail, (res) => {
-        res.pipe(thumbnail);
-        thumbnail.on("finish", () => {
-          thumbnail.close(resolve);
-        });
-      }).on("error", reject);
-    });
+    const processing = await api.sendMessage(`🔍 "${songName}" dhundh rahi hoon... Ruko zara!`, event.threadID, null, event.messageID);
 
-    await api.sendMessage({
-      body: `🎶 ${top.title}\n⏳ Downloading ${mediaType}...`,
-      attachment: fs.createReadStream(thumbPath),
-    }, event.threadID);
+    try {
+      const results = await ytSearch(songName);
+      if (!results || !results.videos.length) throw new Error("Kuch nahi mila! Naam sahi likho.");
 
-    deleteAfterTimeout(thumbPath);
+      const top = results.videos[0];
+      const videoUrl = `https://www.youtube.com/watch?v=${top.videoId}`;
+      const thumbUrl = top.thumbnail;
+      const safeTitle = top.title.replace(/[^a-zA-Z0-9]/g, "_");
+      const cacheDir = path.join(__dirname, "cache");
+      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
 
-    const dlApi = `https://arun-xapi.onrender.com/download?url=${encodeURIComponent(videoUrl)}&type=${mediaType}`;
-    const res = await axios.get(dlApi);
-    const fileUrl = res.data.file_url?.replace("http:", "https:");
+      const thumbnailPath = path.join(cacheDir, `${safeTitle}.jpg`);
+      const mediaPath = path.join(cacheDir, `${safeTitle}.${mediaType === "video" ? "mp4" : "mp3"}`);
 
-    if (!fileUrl) throw new Error("File mil nahi rahi!");
+      const downloadThumb = new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(thumbnailPath);
+        https.get(thumbUrl, (res) => {
+          res.pipe(file);
+          file.on("finish", () => {
+            file.close(resolve);
+          });
+        }).on("error", reject);
+      });
 
-    const ext = mediaType === "video" ? "mp4" : "mp3";
-    const filePath = __dirname + `/cache/${safeTitle}.${ext}`;
-    const file = fs.createWriteStream(filePath);
+      const getMediaUrl = `https://arun-xapi.onrender.com/download?url=${encodeURIComponent(videoUrl)}&type=${mediaType}`;
+      const mediaRes = await axios.get(getMediaUrl);
+      if (!mediaRes.data.file_url) throw new Error("Media download link nahi mila.");
 
-    await new Promise((resolve, reject) => {
-      https.get(fileUrl, (response) => {
-        if (response.statusCode === 200) {
-          response.pipe(file);
-          file.on("finish", () => file.close(resolve));
-        } else {
-          reject("Download failed!");
-        }
-      }).on("error", reject);
-    });
+      const mediaUrl = mediaRes.data.file_url.replace("http:", "https:");
 
-    await api.sendMessage({
-      body: `✅ Done! Enjoy your ${mediaType}!`,
-      attachment: fs.createReadStream(filePath),
-    }, event.threadID, () => deleteAfterTimeout(filePath), event.messageID);
+      const downloadMedia = new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(mediaPath);
+        https.get(mediaUrl, (res) => {
+          if (res.statusCode === 200) {
+            res.pipe(file);
+            file.on("finish", () => file.close(resolve));
+          } else {
+            reject(new Error(`Status: ${res.statusCode}`));
+          }
+        }).on("error", reject);
+      });
 
-  } catch (err) {
-    console.error(err);
-    api.sendMessage(`❌ Error: ${err.message}`, event.threadID, event.messageID);
-  }
+      await Promise.all([downloadThumb, downloadMedia]);
+
+      await api.sendMessage({
+        attachment: fs.createReadStream(thumbnailPath),
+        body: `🎶 ${top.title}\nThoda aur wait karo, file aa rahi hai...`,
+      }, event.threadID);
+
+      await api.sendMessage({
+        attachment: fs.createReadStream(mediaPath),
+        body: `✅ Aapka ${mediaType === "video" ? "video" : "gaana"} ready hai! Enjoy!`,
+      }, event.threadID, event.messageID);
+
+      deleteAfterTimeout(thumbnailPath, 10000);
+      deleteAfterTimeout(mediaPath, 10000);
+
+    } catch (err) {
+      console.error("❌ Error:", err.message);
+      api.sendMessage(`❌ Error: ${err.message}`, event.threadID, event.messageID);
+    }
+  },
 };
