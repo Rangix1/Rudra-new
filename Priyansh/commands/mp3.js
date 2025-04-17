@@ -4,44 +4,52 @@ const path = require("path");
 
 module.exports.config = {
   name: "mp3",
-  version: "1.0.1",
+  version: "1.0",
   hasPermssion: 0,
   credits: "Rudra",
-  description: "Download & send MP3 from URL/API",
+  description: "Download MP3 song by name",
   commandCategory: "media",
-  usages: "mp3 [query or leave blank]",
-  cooldowns: 2,
+  usages: "[song name]",
+  cooldowns: 5,
 };
 
-module.exports.run = async function ({ api, event, args }) {
-  const query = args.join(" ") || "lofi music"; // default search
-  const url = `https://api-vo7p.onrender.com/mp3?search=${encodeURIComponent(query)}`;
-
-  const tempPath = path.join(__dirname, `temp_${event.senderID}.mp3`);
+module.exports.run = async ({ api, event, args }) => {
+  const song = args.join(" ");
+  if (!song) return api.sendMessage("Bhai song ka naam toh de!", event.threadID, event.messageID);
 
   try {
-    const res = await axios({
+    const res = await axios.get(`https://api.guruapi.tech/api/dlsong?name=${encodeURIComponent(song)}`);
+    const url = res.data.url;
+    if (!url) return api.sendMessage("MP3 fetch nahi hua bhai, naam check karo.", event.threadID, event.messageID);
+
+    const mp3Path = path.join(__dirname, "cache", `song.mp3`);
+    const writer = fs.createWriteStream(mp3Path);
+
+    const response = await axios({
+      url,
       method: "GET",
-      url: url,
-      responseType: "stream"
+      responseType: "stream",
     });
 
-    const writer = fs.createWriteStream(tempPath);
-    res.data.pipe(writer);
+    response.data.pipe(writer);
 
     writer.on("finish", () => {
-      api.sendMessage({
-        body: `Lo bhai tumhara gaana: ${query} – Rudra AI`,
-        attachment: fs.createReadStream(tempPath)
-      }, event.threadID, () => fs.unlinkSync(tempPath));
+      api.sendMessage(
+        {
+          body: `Lo bhai tumhara gaana: ${song}`,
+          attachment: fs.createReadStream(mp3Path),
+        },
+        event.threadID,
+        () => fs.unlinkSync(mp3Path),
+        event.messageID
+      );
     });
 
     writer.on("error", () => {
-      api.sendMessage("File download mein error aayi bhai!", event.threadID);
+      api.sendMessage("Download mein error aaya bhai.", event.threadID, event.messageID);
     });
-
   } catch (err) {
     console.log(err);
-    return api.sendMessage("MP3 fetch nahi hua bhai, API ya naam check karo.", event.threadID);
+    api.sendMessage("Error aa gaya bhai, ya toh song nahi mila ya API down hai.", event.threadID, event.messageID);
   }
 };
