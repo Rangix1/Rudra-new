@@ -2,42 +2,35 @@ const axios = require("axios");
 
 module.exports.config = {
   name: "mp3",
-  version: "1.0.0",
+  version: "1.0",
   hasPermssion: 0,
   credits: "Rudra",
-  description: "Get MP3 song by name",
+  description: "Search and send MP3 from YMusic",
   commandCategory: "music",
-  usages: "mp3 [song name]",
-  cooldowns: 5
+  usages: "[song name]",
+  cooldowns: 2
 };
 
-module.exports.run = async function ({ api, event, args }) {
+module.exports.run = async function({ api, event, args }) {
   const songName = args.join(" ");
-  const { threadID, messageID } = event;
-
-  if (!songName) {
-    return api.sendMessage("Please enter the name of the song!\n\nExample: mp3 Tumse hi", threadID, messageID);
-  }
+  if (!songName) return api.sendMessage("Gaane ka naam to do bhai!", event.threadID, event.messageID);
 
   try {
-    const res = await axios.get(`https://vihangayt.me/download/ytmp3?query=${encodeURIComponent(songName)}`);
+    const res = await axios.get(`https://melodyapi.000webhostapp.com/api/ymusic?search=${encodeURIComponent(songName)}`);
+    const data = res.data;
 
-    if (!res.data || !res.data.data || !res.data.data.url) {
-      return api.sendMessage("MP3 fetch nahi hua bhai, naam ya API check karo.", threadID, messageID);
+    if (!data || !data.title || !data.url) {
+      return api.sendMessage("Song nahi mila bhai, thoda aur clear naam do.", event.threadID, event.messageID);
     }
 
-    const mp3Url = res.data.data.url;
+    const msg = {
+      body: `🎵 *${data.title}*\n\nGaana mil gaya bhai, le suno!`,
+      attachment: await global.utils.getStreamFromURL(data.url)
+    };
 
-    return api.sendMessage(
-      {
-        body: `✅ Song found: ${songName}\n\n🎧 Download MP3:\n${mp3Url}`,
-      },
-      threadID,
-      messageID
-    );
-
+    return api.sendMessage(msg, event.threadID, event.messageID);
   } catch (err) {
-    console.log("MP3 Error:", err);
-    return api.sendMessage("Error aayi bhai, song laate time kuch dikkat ho gayi.", threadID, messageID);
+    console.error(err);
+    return api.sendMessage("Error aayi bhai, song laate time kuch dikkat ho gayi.", event.threadID, event.messageID);
   }
 };
