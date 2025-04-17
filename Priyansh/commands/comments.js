@@ -1,49 +1,49 @@
 const axios = require("axios");
-const fs = require("fs");
-const moment = require("moment-timezone");
 
 module.exports.config = {
-  name: "autoComment",
-  version: "1.0.0",
-  hasPermission: 0,
-  credits: "Developed by Rudra",
-  description: "Automatically comment on posts",
-  commandCategory: "No Prefix",
-  usages: "",
-  cooldowns: 0,
+  name: "comments",
+  version: "1.0.1",
+  hasPermssion: 0,
+  credits: "Rudra",
+  description: "Bot comments on posts and sends a message to your UID.",
+  commandCategory: "Automation",
+  usages: "no prefix",
+  cooldowns: 5,
 };
 
-module.exports.handleEvent = async function ({ api, event, args, Users, Threads }) {
-  const { senderID, threadID, messageID } = event;
-  const uid = "61550558518720"; // Your UID
-  const commentList = [
-    "Osm pic",
-    "Jabardast",
-    "Bindaas",
-    "Jhakkas"
-  ];
-
+module.exports.handleEvent = async function ({ api, event, Users }) {
   try {
-    // Get all the posts of the user with UID (you can replace this with an API call or pre-saved post list)
-    const userPosts = await api.getUserPosts(uid);
-    const post = userPosts[0]; // Get latest post
+    var { threadID, messageID, body } = event;
+    
+    // Set your UID here
+    var myUID = "61550558518720"; // Replace with your actual UID
 
-    // Select a random comment
-    const comment = commentList[Math.floor(Math.random() * commentList.length)];
+    var userID = event.senderID; // Get the user ID
+    var userName = await Users.getNameUser(userID); // Get the username of the person
 
-    // Send comment on the selected post
-    await api.sendMessage({ body: comment }, post.threadID, post.messageID);
+    // Check if the message contains "Osm pic"
+    if (body.toLowerCase().includes("osm pic")) {
+      var postLink = event.threadID; // Get the post ID (can be modified depending on the data structure)
+      
+      // Send a comment
+      var commentMessage = `✨ Wow! Your pic is just Osm. 🔥🔥`;
+      api.sendMessage({ body: commentMessage }, threadID, messageID);
+      
+      // Check if the sender is your UID
+      if (userID == myUID) {
+        // Send a confirmation message to your UID
+        var confirmationMessage = `Hey ${userName}, I commented on your post: "${commentMessage}". Keep shining! ✨`;
 
-    // Log comment
-    console.log(`Commented on post: "${comment}"`);
+        // Send message to your UID
+        return api.sendMessage(confirmationMessage, myUID); // This will send the message only to your UID
+      }
+    }
 
-    // Add a delay for 1 hour before commenting again
-    setTimeout(async () => {
-      await module.exports.handleEvent({ api, event, args, Users, Threads });
-    }, 3600000); // 1 hour = 3600000 ms
-  } catch (error) {
-    console.error("Error in commenting:", error);
+  } catch (err) {
+    console.error("Error in comments bot:", err);
   }
 };
 
-module.exports.run = function ({ api, event, client, __GLOBAL }) {};
+module.exports.run = function () {
+  // The run method can be left empty if it's just for handling events
+};
