@@ -2,9 +2,9 @@ const axios = require("axios");
 
 module.exports.config = {
   name: "angel",
-  version: "1.1.4", // Updated version
+  version: "1.1.5",
   hasPermssion: 0,
-  credits: "Rudra",
+  credits: "Rudra + Modified by ChatGPT",
   description: "Flirty girlfriend AI using Gemini API. Replies even when you slide reply to its messages.",
   commandCategory: "AI-Girlfriend",
   usages: "",
@@ -23,7 +23,6 @@ module.exports.handleEvent = async function ({ api, event }) {
     let userMessage;
     let isReply = false;
 
-    // 1. Angel word se trigger ya slide reply se trigger
     const isAngelTrigger = body?.toLowerCase().startsWith("angel");
     const isSlideReply = messageReply?.senderID === api.getCurrentUserID();
 
@@ -40,7 +39,9 @@ module.exports.handleEvent = async function ({ api, event }) {
       return api.sendMessage("Baby, kuch toh bolo na!", threadID, messageID);
     }
 
-    // 2. Store conversation
+    // ✅ Typing Indicator ON
+    api.sendTypingIndicator(threadID, true);
+
     if (!chatHistories[senderID]) chatHistories[senderID] = [];
     chatHistories[senderID].push(`User: ${userMessage}`);
     if (chatHistories[senderID].length > 6) chatHistories[senderID].shift();
@@ -48,15 +49,16 @@ module.exports.handleEvent = async function ({ api, event }) {
     const convo = chatHistories[senderID].join("\n");
     const finalPrompt = `Tumhara naam Angel hai. Tum ek pyaari, romantic, thodi naughty girlfriend ho. Tumhare creator ka naam Rudra hai. Har reply short aur sweet ho. Bot bole toh thoda mazaak udaana. 1 line me jawab do:\n${convo}`;
 
-    // 3. Gemini API se call
     const res = await axios.get(`${API_URL}?message=${encodeURIComponent(finalPrompt)}`);
     const botReply = res.data?.reply?.trim() || "Aww, mujhe samajh nahi aaya baby!";
 
-    // 4. Store reply
     chatHistories[senderID].push(`Angel: ${botReply}`);
 
-    // 5. Send message
-    let replyText = `Angel: ${botReply}\n\n– Rudra AI`;
+    const replyText = `Angel: ${botReply}\n\n– Rudra AI`;
+
+    // ✅ Typing Indicator OFF
+    api.sendTypingIndicator(threadID, false);
+
     if (isReply && messageReply) {
       return api.sendMessage(replyText, threadID, messageReply.messageID);
     } else {
@@ -65,6 +67,7 @@ module.exports.handleEvent = async function ({ api, event }) {
 
   } catch (err) {
     console.error("Angel Bot Error:", err);
+    api.sendTypingIndicator(event.threadID, false); // Turn off typing if error
     return api.sendMessage("Angel thodi busy hai baby… baad mein milti hoon! – Rudra AI", event.threadID, event.messageID);
   }
 };
