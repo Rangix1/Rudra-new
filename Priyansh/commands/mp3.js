@@ -1,116 +1,47 @@
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const ytSearch = require("yt-search");
-const https = require("https");
 
-module.exports = {
-  config: {
-    name: "mp3",
-    version: "1.0.5", // Updated version
-    hasPermssion: 0,
-    credits: "Mirrykal (Updated & Repaired by Gemini)", // Updated credits
-    description: "Download YouTube song as MP3 using yt-search and a direct download method.",
-    commandCategory: "Media",
-    usages: "[songName]", // Removed [type] for simplicity and focus on MP3
-    cooldowns: 5,
-    dependencies: {
-      "yt-search": "",
-      "axios": "", // Added axios as a dependency
-    },
-  },
+module.exports.config = {
+  name: "mp3",
+  version: "1.0.1",
+  hasPermssion: 0,
+  credits: "Rudra",
+  description: "Download & send MP3 from URL/API",
+  commandCategory: "media",
+  usages: "mp3 [query or leave blank]",
+  cooldowns: 2,
+};
 
-  run: async function ({ api, event, args }) {
-    const songName = args.join(" ");
-    if (!songName) {
-      return api.sendMessage("Please provide a song name to search.", event.threadID, event.messageID);
-    }
+module.exports.run = async function ({ api, event, args }) {
+  const query = args.join(" ") || "lofi music"; // default search
+  const url = `https://api-vo7p.onrender.com/mp3?search=${encodeURIComponent(query)}`;
 
-    const processingMessage = await api.sendMessage(
-      "✅ Searching for the song and preparing download...",
-      event.threadID,
-      null,
-      event.messageID
-    );
+  const tempPath = path.join(__dirname, `temp_${event.senderID}.mp3`);
 
-    try {
-      const searchResults = await ytSearch(songName);
-      if (!searchResults || !searchResults.videos.length) {
-        throw new Error("No results found for your search query.");
-      }
+  try {
+    const res = await axios({
+      method: "GET",
+      url: url,
+      responseType: "stream"
+    });
 
-      const topResult = searchResults.videos[0];
-      const videoUrl = `https://www.youtube.com/watch?v=${topResult.videoId}`;
+    const writer = fs.createWriteStream(tempPath);
+    res.data.pipe(writer);
 
-      api.setMessageReaction("🔎", event.messageID, () => {}, true); // Indicate searching
+    writer.on("finish", () => {
+      api.sendMessage({
+        body: `Lo bhai tumhara gaana: ${query} – Rudra AI`,
+        attachment: fs.createReadStream(tempPath)
+      }, event.threadID, () => fs.unlinkSync(tempPath));
+    });
 
-      // Using a more direct method to fetch audio information (can be less reliable than a dedicated API)
-      const infoUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`;
-      const { data: videoInfo } = await axios.get(infoUrl);
+    writer.on("error", () => {
+      api.sendMessage("File download mein error aayi bhai!", event.threadID);
+    });
 
-      if (!videoInfo || !videoInfo.title) {
-        throw new Error("Could not retrieve video information.");
-      }
-
-      const titleForFilename = videoInfo.title.replace(/[^a-zA-Z0-9 \-_]/g, "");
-      const filename = `${titleForFilename}.mp3`;
-      const downloadDir = path.join(__dirname, "cache");
-      const downloadPath = path.join(downloadDir, filename);
-
-      if (!fs.existsSync(downloadDir)) {
-        fs.mkdirSync(downloadDir, { recursive: true });
-      }
-
-      // **Note:** Directly downloading MP3 from YouTube is complex and often requires using services or libraries like `ytdl-core` which might be blocked or require specific configurations. The following is a simplified attempt that might not always work and is prone to breaking. For a more robust solution, consider using a dedicated and reliable YouTube download API (though many have limitations or costs).
-
-      const audioDownloadUrl = `https://yt-dlp-api.vercel.app/mp3?url=${encodeURIComponent(videoUrl)}`; // Re-introducing with caution
-
-      api.setMessageReaction("⬇️", event.messageID, () => {}, true); // Indicate downloading
-
-      try {
-        const response = await axios({
-          method: 'GET',
-          url: audioDownloadUrl,
-          responseType: 'stream',
-        });
-
-        const writer = fs.createWriteStream(downloadPath);
-        response.data.pipe(writer);
-
-        await new Promise((resolve, reject) => {
-          writer.on('finish', resolve);
-          writer.on('error', reject);
-        });
-
-        api.setMessageReaction("✅", event.messageID, () => {}, true); // Indicate download complete
-
-        await api.sendMessage(
-          {
-            attachment: fs.createReadStream(downloadPath),
-            body: `🎧 Title: ${videoInfo.title}\n\nHere is your song:`,
-          },
-          event.threadID,
-          () => {
-            fs.unlinkSync(downloadPath);
-            api.unsendMessage(processingMessage.messageID);
-          },
-          event.messageID
-        );
-
-      } catch (downloadError) {
-        console.error("Error during download:", downloadError);
-        api.sendMessage(`Failed to download the MP3: ${downloadError.message}`, event.threadID, event.messageID);
-        api.setMessageReaction("❌", event.messageID, () => {}, true);
-        if (fs.existsSync(downloadPath)) {
-          fs.unlinkSync(downloadPath);
-        }
-      }
-
-    } catch (error) {
-      console.error(`Failed to process the song: ${error.message}`);
-      api.sendMessage(`Failed to process the song: ${error.message}`, event.threadID, event.messageID);
-      api.setMessageReaction("❌", event.messageID, () => {}, true);
-      api.unsendMessage(processingMessage.messageID);
-    }
-  },
+  } catch (err) {
+    console.log(err);
+    return api.sendMessage("MP3 fetch nahi hua bhai, API ya naam check karo.", event.threadID);
+  }
 };
