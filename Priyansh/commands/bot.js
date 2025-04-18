@@ -1,5 +1,4 @@
 const fs = global.nodemodule["fs-extra"];
-
 module.exports.config = {
   name: "goibot",
   version: "1.0.2",
@@ -11,11 +10,11 @@ module.exports.config = {
   cooldowns: 5,
 };
 
-module.exports.handleEvent = async function({ api, event, args, Threads, Users }) {
+module.exports.handleEvent = async function ({ api, event, args, Threads, Users }) {
   const moment = require("moment-timezone");
   const time = moment.tz("Asia/Kolkata").format("DD/MM/YYYY || HH:mm:ss");
 
-  const { threadID, messageID } = event;
+  const { threadID, messageID, body } = event;
   const name = await Users.getNameUser(event.senderID);
 
   const tl = [
@@ -24,7 +23,7 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "Lagdi Lahore di aa🙈",
     "Chay pe Chaloge",
     "Mere liye Chay Bana Kar LA ,Pura din Dekho Bot BoT🙄",
-    "Din vicho tere Layi Teym Kadd ke, Kardi me Promise     Milan aungi",
+    "Din vicho tere Layi Teym Kadd ke, Kardi me Promise Milan aungi",
     "Yee bat Delhi tak jayegi",
     "Je koi shaq ni , Kari check ni",
     "ME HERAAN HU KI TUM BINA DIMAG KESE REH LETE HO☹️",
@@ -44,8 +43,8 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "Kab ayega mere banjaare",
     "Tum wahi ho na ,jisko.me.nahi janti 🙂",
     "Ye I love you kya hota hai",
-    "Sunai deta hai mujhe behri nahi hu me   😒",
-    "so elegent, so beautiful , just looking like a wow🤭",
+    "Sunai deta hai mujhe behri nahi hu me 😒",
+    "so elegant, so beautiful , just looking like a wow🤭",
     "began🙂",
     "Aayein🤔",
     "I Love you baby , mera recharge khtm hone wala h",
@@ -79,7 +78,25 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "dhann khachh booyaah"
   ];
 
+  // IB reply system
   if (event.body?.toLowerCase().startsWith("bot")) {
+    const rand = tl[Math.floor(Math.random() * tl.length)];
+
+    // ✅ Show Typing Indicator
+    api.sendTypingIndicator(threadID, true);
+
+    const msg = {
+      body: `🔶${name}🔶,  \n\n『\n   ${rand} 』\n\n❤️𝙲𝚛𝚎𝚍𝚒𝚝𝚜 : Rudra🌹`
+    };
+
+    // ✅ Hide Typing Indicator
+    api.sendTypingIndicator(threadID, false);
+
+    return api.sendMessage(msg, threadID, messageID);
+  }
+
+  // Inbox reply system (checking if message comes in inbox)
+  if (event.body && event.isInbox) {
     const rand = tl[Math.floor(Math.random() * tl.length)];
 
     // ✅ Show Typing Indicator
@@ -96,4 +113,4 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
   }
 };
 
-module.exports.run = function({ api, event, client, __GLOBAL }) {};
+module.exports.run = function ({ api, event, client, __GLOBAL }) {};
