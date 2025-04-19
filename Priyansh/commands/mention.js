@@ -35,7 +35,7 @@ module.exports.run = async function({ api, event }) {
     mentionedUsers.add(mentionID);
 
     return api.sendMessage({
-      body: `${mentionName}, ab jab bhi tum message bhejoge toh bot tumhe mention karega.`,
+      body: `${mentionName}, oye.`,
       mentions: [{ id: mentionID, tag: mentionName }]
     }, threadID);
   }
