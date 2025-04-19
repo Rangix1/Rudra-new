@@ -9,11 +9,16 @@ module.exports.config = {
   cooldowns: 5
 };
 
-let mentionStatus = true; // Mention system ON by default
-let mentionedUsers = new Set(); // Store tracked user IDs
+let mentionStatus = true;
+let mentionedUsers = new Set();
 
-module.exports.run = async function({ api, event }) {
+module.exports.run = async function({ api, event, Users, permission }) {
   const { threadID, senderID, mentions, body } = event;
+
+  // Only allow admin to use start/stop
+  if (["stopmention", "startmention"].includes(body.toLowerCase()) && permission !== 2) {
+    return api.sendMessage("Sirf admin hi is command ko chala sakta hai.", threadID, event.messageID);
+  }
 
   // Handle OFF
   if (body.toLowerCase() === "stopmention") {
@@ -41,7 +46,6 @@ module.exports.run = async function({ api, event }) {
   }
 };
 
-// Listen to all messages and auto-mention
 module.exports.handleEvent = async function({ api, event }) {
   const { threadID, senderID } = event;
 
