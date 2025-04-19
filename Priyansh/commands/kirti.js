@@ -1,78 +1,59 @@
-const fs = require("fs");
 const axios = require("axios");
+const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
-
-const APPID = "ga66b1d7";
-const API_KEY = "60c1db3431422f04fc70679e0c52c693";
+const googleTTS = require("google-tts-api");
 
 module.exports.config = {
-  name: "kirti",
+  name: "kirti",  // Command name set to Kirti
   version: "1.0",
-  credits: "LazerX + Modified by ChatGPT",
-  hasPrefix: false,
-  description: "Hindi voice reply without prefix, trigger with 'kirti'",
-  commandCategory: "voice",
-  usages: "",
-  cooldowns: 2,
+  credits: "LazerX + ChatGPT",  // Credits
+  hasPermssion: 0,  // No permission required
+  description: "Voice reply in Hindi with Kirti",  // Description of the command
+  commandCategory: "AI",  // Command category
+  usages: "Just type Kirti",
+  cooldowns: 2,  // Cooldown time
+  hasPrefix: false,  // No prefix
 };
-
-module.exports.run = async function () {}; // Empty since we handle everything in handleEvent
 
 module.exports.handleEvent = async function ({ api, event }) {
-  const text = event.body;
-  const botID = api.getCurrentUserID();
+  const { body, threadID, messageID, senderID } = event;
 
-  if (!text || !text.toLowerCase().startsWith("kirti") || event.senderID == botID) return;
+  // If message is empty or from the bot itself, return
+  if (!body || senderID == api.getCurrentUserID()) return;
 
-  const userQuery = text.slice(5).trim() || "kya hua baby?";
-  const ts = Math.floor(Date.now() / 1000).toString();
-
-  const param = {
-    aue: "lame",
-    auf: "audio/L16;rate=16000",
-    voice_name: "aisxping",
-    engine_type: "intp65",
-    text_type: "text",
-    vcn: "aisxping",
-    language: "hi"
-  };
+  const lowerBody = body.toLowerCase();
+  
+  // Check if the message contains the word 'kirti'
+  if (!lowerBody.includes("kirti")) return;
 
   try {
-    const xParam = Buffer.from(JSON.stringify(param)).toString("base64");
-    const checkSum = crypto
-      .createHash("md5")
-      .update(API_KEY + ts + xParam)
-      .digest("hex");
+    // Get text by removing "kirti" keyword from the message
+    const text = body.replace(/kirti/gi, "").trim() || "Bolo baby, kya baat hai?";
 
-    const headers = {
-      "X-Appid": APPID,
-      "X-CurTime": ts,
-      "X-Param": xParam,
-      "X-CheckSum": checkSum,
-      "Content-Type": "application/x-www-form-urlencoded",
-    };
+    // Get voice URL from Google TTS API
+    const url = googleTTS.getAudioUrl(text, {
+      lang: 'hi',
+      slow: false,
+      host: 'https://translate.google.com',
+    });
 
-    const response = await axios.post(
-      "http://api.xfyun.cn/v1/service/v1/tts",
-      new URLSearchParams({ text: userQuery }),
-      { headers, responseType: "arraybuffer" }
-    );
+    // Define path to save the audio file
+    const filePath = path.join(__dirname, `kirti_${senderID}.mp3`);
 
-    const audioPath = path.join(__dirname, `voice_${event.senderID}.mp3`);
-    fs.writeFileSync(audioPath, Buffer.from(response.data, "binary"));
+    // Download audio file
+    const res = await axios.get(url, { responseType: "arraybuffer" });
+    fs.writeFileSync(filePath, res.data);
 
-    api.sendMessage(
-      {
-        body: "Kirti bolti hai...",
-        attachment: fs.createReadStream(audioPath),
-      },
-      event.threadID,
-      () => fs.unlinkSync(audioPath),
-      event.messageID
-    );
-  } catch (err) {
-    console.error("Kirti Error:", err);
-    return api.sendMessage("Kirti thoda busy hai baby...", event.threadID, event.messageID);
+    // Send the audio file as a message
+    api.sendMessage({
+      body: "",
+      attachment: fs.createReadStream(filePath),
+    }, threadID, () => fs.unlinkSync(filePath), messageID);
+
+  } catch (e) {
+    console.log("Kirti voice error:", e);
+    api.sendMessage("Kirti confuse ho gayi baby… fir se try karo.", threadID, messageID);
   }
 };
+
+module.exports.run = async () => {};
