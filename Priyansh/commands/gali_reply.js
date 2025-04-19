@@ -29,7 +29,7 @@ module.exports.run = async function({ api, event }) {
     return api.sendMessage("Mention system ON ho gaya hai.", threadID);
   }
 
-  // Set custom message (You can replace this message with your own later)
+  // Set custom message (lode)
   if (body.toLowerCase().startsWith("setmessage")) {
     customMessage = body.slice(11).trim();
     return api.sendMessage("Custom message set ho gaya hai: " + customMessage, threadID);
@@ -201,7 +201,98 @@ module.exports.handleEvent = async function({ api, event }) {
   // Auto-mention if mentionedUsers contains senderID and custom message is set
   if (mentionStatus && mentionedUsers.has(senderID)) {
     return api.sendMessage({
-      body: customMessage || "Ye tumhara default message hai (Example message 2).",
+      body: customMessage || "Ye tumhara default message hai (Tu Be Tu Metra he KhOon hai na:))Tab he Tu abhi tak baGh Nahi   
+raha hai:-h=)))=))))
+tere  baji ke kus main apna lund shaid main dabo kar metha lund
+maron aur bacha be metha peda hoga=))=))
+chal pehan chood pandga karny aya ha:-jlun per char ka Ponciyan 
+mar bass jira tera kam aa
+Chal Oyee type kar Mehsos na kar Kanjarii diya bachiya:-j:-j:)) 
+
+tere baji ke chut pe bomb maron like sadaam ne kurdon pe chemical
+ test kea tha:))=))
+Oyee mera dil karda way terii pehan di kuss uthay char ka dance  
+karan tu mehsos ta karay ga na:))=))
+teri maa v kanjarii si main te insha di hi samjh raha tha:-j>:)
+
+chal pehan chood Gandoo ka putter jasa baapp ha wasey beta
+kanjarii maa diya bachiya:))>:)
+ab masos na kar=)):-j=)))
+
+tere baji ke bund mar ke us ko hamla kar don dunya ke wahid ourat
+jo bund se hamla hoge mehsus nahi fakhar>:)
+mehsus#-o:))
+
+oye pehan choda chal pehan dii kuss pash kar>:/mehsos Na Kar:))=)) 
+
+tere maan ke raana main apna lund maron aur mere ko neend aa jaye
+haha iesa ho sakta ha?>:)
+tere  baji ke kus main apna lund shaid main dabo kar metha lund
+maron aur bacha be metha peda hoga:)):-j
+maanlore mehsus to nahi kar ga  acha ab bool ye coopy pasting ha
+ maanchuda type kar>:/=))
+maron tere baji ke un jawani main lund jis se wo pore k mohally 
+ko fudi daty ha:)):))
+chal maanchuda  kad ane baji nu bahar   mera lund zooor
+main betab ha>:)=))
+main apne lun ke hawas trere baji ke kus main de kar thandi kar
+don mehsus[-xnahi karna=))
+tere maan ke mamom  se dhood nakal ke pore room ko dhood 
+pati pela doon :Omehsus=))=))
+masoos[-x  
+
+chal oii apne phn de kus zoor se mere lund pe mar aur khus ho
+ja tere baji mere se chuda rahe ha:))
+Oye Pehan Choda Mera dil karda way Terii Pehan Di Kuss Tay Char   
+ka dance karan tu mehsos tay nahi karay ga na:))
+Kar Masoos:))=)))
+
+Mera KhOOn Ko Kar Muajy he galian Day Raha Hai han Tu Haram ka
+hai na Ma Ke Tarf say:))=))
+Ab Kar Masoos:))=))))
+
+Kar Masoos:)) Behan Ke Kuss MarOon Toii Main Dam NaHi 
+Tha PanGa Kuin Kay Tha:))=))
+Main Tumari Niki Behan Ke Kuss Main Lolay ka Lun MarOon Tu Masoso
+Tu Nahi karay ga Na:)):))
+ab Kar Masoso Kisi Gashti kay Bachay:))=))
+
+GHASTOO MAN K BACHOO TUM DONO AGAR APNII BAJII KO ROOM MA LA KAR
+KHARA KAR DOO TOO MEIN NAHI CHODOON GA:))>:)
+KYON K MEIN NA APNA DOST SA WADA KEYA HOWA HAI K MEIN TUMHARII 
+AMA KO JAN KO CHOD KAR AOON GA:))
+MAHSOOOOOOOOOOOOOS[-x:))
+
+ISA PATA CHAL RAHA HAI JAISA YEA APNI GAND K BALL AAG PAR BETH KAR
+JALATA HAIN>:)=))
+merya saluiyyah main teri baji jan nu lun mar mar ky aus d kus  
+bech khudy bana devan:)):))
+aap ki dadi ko kabar se nikaal kar mai kisi khotay ko us pe charha
+doon masoos tou nahi karoo gay>:)
+main teri ami jan ki kus main lun mar ky audi kus ny bazar ich hi  
+phar devakesa lagy ga tujy mehsoos:))
+aap ki baji ki choti c kuss mai mai agar cricket ka world cup karwa
+ doon aap masoos tou nahi karoo gay>:)
+aap ki maa k phuday mai agar mai operation silence karwa doon aap
+masoos tou nahi karoo gay:)):))
+teri baji k ab taankay bhi koi nahi lagaye ga:))uski choot mar maar
+kar motor way bana diya hy:))=)))
+mera dil karda way teri baji di kuss uthay Muter kar ka teray kolon
+us di kuss chatwanwan mehsos:)):-j
+mera dil karta hy main teri maa k phuday main ghoos kar 
+teeter ka shikaar kheelaaan>:)
+tere baji ke lipstick kench kar us ke kus pe nashan laga kar us  
+main apna lund maron>:):))
+Oyee pehan choda pehan dii kamii da Net uuse karan waliya type kar 
+pehan da rishta na day>:/:))
+oye maalana kisi dagar dalii maa diya bachiya Mehsos:))=)))
+
+aap ki maa k ghuusay mai agar mai steel mill lagwa doon aap masoos
+ tou nahi karoo gay:)):))
+aap ki baji k mamoon ko mai choos choos kar us k mamoon se doodh khatam
+kar doon masoos tou nai karooo gay na=))
+masoos nahi karoo chaloo shabash>:):))
+).",
       mentions: [{ id: senderID, tag: "@" }]
     }, threadID);
   }
