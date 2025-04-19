@@ -1,5 +1,5 @@
 module.exports.config = {
-  name: "abuse",
+  name: "mention2",
   version: "1.0",
   hasPermssion: 2,
   credits: "Rudra",
