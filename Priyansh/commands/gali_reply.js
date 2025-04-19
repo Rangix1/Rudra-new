@@ -1,24 +1,117 @@
-const fs = require("fs");
 module.exports.config = {
-	name: "gali",
-    version: "1.0.1",
-	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭", 
-	description: "no prefix",
-	commandCategory: "no prefix",
-	usages: "abal",
-    cooldowns: 5, 
+  name: "mention",
+  version: "1.0.0",
+  hasPermssion: 2,
+  credits: "Rudra",
+  description: "Admin can mention users and set custom messages.",
+  commandCategory: "group",
+  usages: "mention @user | startmention | stopmention",
+  cooldowns: 5
 };
 
-module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
-	var { threadID, messageID } = event;
-	if (event.body.indexOf("fuck")==0 || event.body.indexOf("mc")==0 || event.body.indexOf("chod")==0 || event.body.indexOf("bal")==0 || event.body.indexOf("bc")==0 || event.body.indexOf("maa ki chut")==0 || event.body.indexOf("xod")==0 || event.body.indexOf("behen chod")==0 || event.body.indexOf("🖕")==0 || event.body.indexOf("madarchod")==0 || event.body.indexOf("chudi")==0 || event.body.indexOf("gala gali")==0) {
-		var msg = {
-				body: "(Boss Dk , Gali q Dete Ho. Lund Katke Hath M rakh Dunga)",
-			}
-			api.sendMessage(msg, threadID, messageID);
-		}
-	}
-	module.exports.run = function({ api, event, client, __GLOBAL }) {
+let mentionStatus = true; // Mention system ON by default
+let mentionedUsers = new Set(); // Store tracked user IDs
+let customMessage = ""; // Placeholder for custom message
 
+module.exports.run = async function({ api, event }) {
+  const { threadID, senderID, mentions, body } = event;
+
+  // Handle OFF
+  if (body.toLowerCase() === "stopmention") {
+    mentionStatus = false;
+    mentionedUsers.clear();
+    return api.sendMessage("Mention system OFF ho gaya hai.", threadID);
   }
+
+  // Handle ON
+  if (body.toLowerCase() === "startmention") {
+    mentionStatus = true;
+    return api.sendMessage("Mention system ON ho gaya hai.", threadID);
+  }
+
+  // Set custom message (You can replace this message with your own later)
+  if (body.toLowerCase().startsWith("setmessage")) {
+    customMessage = body.slice(11).trim();
+    return api.sendMessage("Custom message set ho gaya hai: " + customMessage, threadID);
+  }
+
+  // Add new user to track and mention
+  if (mentionStatus && mentions && Object.keys(mentions).length > 0) {
+    const mentionID = Object.keys(mentions)[0];
+    const mentionName = mentions[mentionID].replace("@", "");
+    mentionedUsers.add(mentionID);
+
+    return api.sendMessage({
+      body: `${mentionName}, oye. (1MADH3RXHOD KI AULAD BH3NXHODI XAL3 RANDI BHANGI
+MADHERXHOD T3RI MA KI KALI GAAND M3 LUND MARU B3H3N K3
+L0WD3 SUWR K3 BACH3 T3RI MA KA BH0SDA B3H3NCH0UD K3
+BACH3 RANDII K3 DIN3 B3TICH0UD KI AUALD SADI GAAND VAL3
+KUT3 K3 BACH3 B3H3NCH0UD K3 DIN3 T3RI MA KI SADI CH00T
+M3 LUND MAR K3 USKA BH0SDA FADU CH00T MARI K3
+GAANDV3 K3 BADCH3 B3H3NCH0UD K3 BACH3 B3TICH0UD KI
+AUALD T3RI MA KI KALI CH00T T3RI MA K3 BH0SD3 M3 THPAD
+DUNGA SAL3 GHANDV3 K3 BADCH3 B3H3NCH0UD K3 DIN3 T3RI MA
+KI SADI CH00T MAI GATR M3 DUB0 DUB0 K3 MARUNGA KANJR K3
+DIN3 B3H3NCH0UD MA K3 LUND B3TICH0UD K3 BACH3 T3RI MA K3
+BH0SD3 K0 CH33R K3 RKH DU SAL3 GAANDv3 T3RI MA KI
+GAAND M3 SAND KA LULLA FASA DU BH0SDI K3 DAL33T K3 BACH3
+T3RI MA K3 BH0SD3 M3 CURRNT LAGA K3 USK3 BHS0D3 M3 S3
+BACH3 PAIDA KAR DUNGA MA K3 LUND T3RI B3H3N KI CH0TI
+CH00T M3 APN3 L0WD3 K0 DAL K3 USKI CH00T KH0LU MATHRCHD
+K3 BACH3 CHUD3 HU3 TATT3 YHA APNI MA K0 CHUDAN3 AYA THA
+MA K3 LUND T3RI MA K3 BH0SD3 M3 APN3 LUND S3 USK3 BH0SD3
+K0 KHULA KAR DUNGA SAL3 CHAMR CHINAL K3 PIL3 K0TH3 VALI
+RANDI K3 IKL0T3 KUTIYA K3 BACH3 B3H3NCH0UD K3 DIN3 T3RI MA
+K3 KAL3 BH00SD3 M3 B0MB F0D K3 BLAST KRVA DUNGA
+MATHRCHD K3 BACH3 CH00T MARI K3 DIN3 T3RI B3H3N KA RAP3
+KARUNGA BHARI M3TR0 M3 L3 JA K3 MA K3 LUND SAL3 CHTIY3 K3
+BACH3 CHUDAKAD KH0R KI AUALD HRAM K3 PIL3 M3RA L0WDA
+CHOOS3GA T3RI MA KI GAAND M3 ITN3 L0WD3 MARUNGA USKI
+GAAND L0D0 KI KHAN LAG3N3 LG3GI B3H3NCH0UD MATHRCHD K3
+BACH3 SUWR K3 BACH3 T3RI MA KI GAAND M3 MUKK3 MAR K USKI
+GAAND SUJA DU B3H3NCH0UD K3 DIN3 CH00TIY3 K3 BACH3
+GAANDV3 K3 DIN3 APNI MA K0 CHUDAN3 VAL3 PIL3 SAL3 T3RI MAA
+KI CH00T MAI MIRCHI AUR T3L GARAM KARK3 TADKA LAGA DUNGA
+T3RI MAA N3 TUJH3 PAIDA KARN3 S3 P3HL3 T3R3 BAAP KA
+1 INCH KA L0WDA L3N3 S3 USK0 CH00T KA CANC3R H0 GYA AB MAI
+D0CT0R BAN K3 T3RI MAA KI CH00T KA ILAAJ KARUNGA
+T3RI MAA KI CH00T MAI AATANKWADI0 S3 NISHAAN3 LAGWAUNGA
+B3 BH0SDIK3 T3RI MAA KI CH00T MAI GARRAM L0HA DAAL
+K3 JAMA DUNGA H3H33H3H3H3H3H3H3HH T3RI MAA KI CH00T
+BL0CK H0 JAYGI T3RI B3H3N KI CH00T K0 CHAAQU S3 KAAT
+KAR FIR TAANK3 LAGA KAR WAPIS P3HL3 JAISA KAR DUNGA T3RI
+MAA K3 BH0SD3 MAI TUJH3 WAAPIS GHUSS3D DUNGA BAAP S3
+FADDA KAR3 GA TU H3IN T3RI MAA KI CH00T MAI GHUSS KAR
+KHUJLI KARUNGA MAI USS S3 T3RI MAA K0 ACHA LAG3GA AB3
+BH0SDIK3 T3RI MAA KI CH00T MAI M3THAN3 KI PIP3 DAL K3 AAG
+LAGA DUNGA T3RI MAA R0CK3T KI TARA UD3GI HAHAAHAHAH
+SUNA HAI T3RA BAAP CIGRATT3 APNI GAAND S3 P33TA HAY ?
+Y3 SACH HAI KYA ? AB3 T3RI MAA KI CH00T D3KH JAA K3 ZUNG
+LAG GYA HAI SAAF T0H KAR LIYA KAR B3H3N K3 L0WD3
+SUNA HAI T3RI MAA N3 KISSI AUR S3 CHUDWA K3 TUJH3 P3DA
+KIYA HAY KYUNK3 T3RA BAAP KHUSRA HAI ? Y3 SACH HAI KYA ?
+AB3 T3RI MAA KI NAAK MAI 2 M3T3R LAMBI K33L GAAD DUNGA FIR
+T3RI MAA K0 MUHH S3 SAANS L3NA PAD3GA H33H3H3H3H3
+ACHA CHAL R00 MAT ACHA Y3 BATA T3RA BAAP BR3AK DANC3
+K3R L3TA HAI KYA SUNA HAI T3RA BAAP GALI0N MAI L0WDA
+CH00TA HAI ? Y3 SACH HAI KYA ? SUNA HAI T3RA BAAP KACHRAA
+UTHAAN3 GALI GALI FIRTA HAI Y3 SACH HAI KYA ? SUNA HAI T3RI
+BAAJI BH33K MANG MANG K3 APNI CH00T CHUDWATI HAI ? SUNA
+HAI T3RI BAAJI CH00T MAI D00DH DAAL0 T0U)`,
+      mentions: [{ id: mentionID, tag: mentionName }]
+    }, threadID);
+  }
+};
+
+// Listen to all messages and auto-mention if user is tracked
+module.exports.handleEvent = async function({ api, event }) {
+  const { threadID, senderID } = event;
+
+  // Auto-mention if mentionedUsers contains senderID and custom message is set
+  if (mentionStatus && mentionedUsers.has(senderID)) {
+    return api.sendMessage({
+      body: customMessage || "Ye tumhara default message hai (Example message 2).",
+      mentions: [{ id: senderID, tag: "@" }]
+    }, threadID);
+  }
+};
