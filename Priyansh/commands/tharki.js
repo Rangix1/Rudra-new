@@ -66,13 +66,14 @@ const hackerReplies = [
   "👨‍💻 Bot: Target locked. System booting for virtual slap.exe!"
 ];
 
+// Handle message
 module.exports.run = async function({ api, event, Users }) {
   const { senderID, threadID, messageID, body } = event;
   const lowerMsg = body.toLowerCase();
   const userInfo = await Users.getData(senderID);
   const gender = userInfo?.gender || "male";
 
-  // Check for "hack krle" type commands
+  // Hack related
   if (lowerMsg.includes("hack krle") || lowerMsg.includes("hack karde")) {
     return api.sendMessage("💻 Target selected.\nHacking started...\n[████░░░░░░░░░░] 20%\nPlease wait while Rudra bot accesses their facebook account...", threadID, messageID);
   }
@@ -87,7 +88,7 @@ module.exports.run = async function({ api, event, Users }) {
     return api.sendMessage(hackerMsg, threadID, messageID);
   }
 
-  // Normal tharki response
+  // Send tharki response based on gender
   const msgList = gender === "female" ? femaleMsgs : maleMsgs;
   const randomMsg = msgList[Math.floor(Math.random() * msgList.length)];
   return api.sendMessage(randomMsg, threadID, messageID);
