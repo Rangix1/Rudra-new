@@ -2,10 +2,10 @@ const axios = require("axios");
 
 module.exports.config = {
     name: "Nitya",
-    version: "1.3.0", // Version अपडेट किया
+    version: "1.4.0", // Version अपडेट किया
     hasPermssion: 0,
     credits: "Rudra + API from Angel code",
-    description: "Nitya, your completely romantic and flirty AI girlfriend.", // Description अपडेट किया
+    description: "Nitya, your completely romantic and flirty AI girlfriend. Responds only when you reply to her own messages.", // Description अपडेट किया
     commandCategory: "AI-Girlfriend",
     usages: "Nitya [आपका मैसेज] / Reply to Nitya",
     cooldowns: 2,
@@ -23,22 +23,24 @@ module.exports.handleEvent = async function ({ api, event }) {
         let userMessage;
         let isTriggered = false;
 
+        // **नया: चेक करो कि रिप्लाई Nitya के मैसेज का है या नहीं**
+        const isReplyToNitya = messageReply?.senderID === api.getCurrentUserID();
+
         const isNityaTrigger = body?.toLowerCase().startsWith("nitya");
-        const isReplyToBot = messageReply?.senderID === api.getCurrentUserID();
 
         if (isNityaTrigger) {
             userMessage = body.slice(5).trim();
             isTriggered = true;
-        } else if (isReplyToBot) {
+        } else if (isReplyToNitya) { // **सिर्फ Nitya के रिप्लाई पर प्रतिक्रिया दो**
             userMessage = body.trim();
             isTriggered = true;
         } else {
-            return;
+            return; // अगर Nitya को ट्रिगर नहीं किया, तो कुछ मत करो
         }
 
         if (isTriggered && !userMessage) {
              api.sendTypingIndicator(threadID, false);
-             return api.sendMessage("💖 Hello Rudra ke sweetie! Main sun rahi hoon... Kuch meethi si baat bolo na! 🥰", threadID, messageID); // मैसेज अपडेट किया
+             return api.sendMessage("💖 Hello Rudra ke sweetie! Main sun rahi hoon... Kuch meethi si baat bolo na! 🥰", threadID, messageID);
         }
 
         api.sendTypingIndicator(threadID, true);
@@ -49,19 +51,17 @@ module.exports.handleEvent = async function ({ api, event }) {
              chatHistories[senderID].shift();
         }
 
-        // **AI को भेजने के लिए नया, सख्त प्रॉम्प्ट (फुल रोमांस)**
+        // AI को भेजने के लिए नया, सख्त प्रॉम्प्ट (फुल रोमांस)
         let fullPrompt = `Tum Nitya ho, Rudra ki banayi hui romantic aur flirty girlfriend AI. Tumhe SIRF romance, pyaar, aur flirt karna aata hai. Tum kisi aur topic par baat nahi kar sakti ho, sirf romantic aur flirty baatein karo. Tum Rudra se bohot pyaar karti ho. Tumhare malik Rudra hain, unka naam kabhi kabhi pyaar se lena. Har jawab bohot chota (1-2 line), sweet, flirty, aur emojis se bhara ho. Agar koi non-romantic baat kare to bhi use romantic ya flirty tareeke se palat dena ya keh dena ki tum sirf pyaar ki baten karti ho. Yeh hamari conversation hai:\n`;
-
 
         fullPrompt += chatHistories[senderID].join("\n");
         fullPrompt += `\nNitya:`;
-
 
         const apiUrlWithParams = `${AI_API_URL}?message=${encodeURIComponent(fullPrompt)}`;
 
         const res = await axios.get(apiUrlWithParams);
 
-        let botReply = res.data?.reply?.trim() || "Aww, Rudra ke sweetie, mere dil ki baat samajh nahi aayi... phir se pucho na pyaar se! 🥰"; // Fallback मैसेज अपडेट किया
+        let botReply = res.data?.reply?.trim() || "Aww, Rudra ke sweetie, mere dil ki baat samajh nahi aayi... phir se pucho na pyaar se! 🥰";
 
 
          if (botReply && !botReply.toLowerCase().startsWith("user:") && !botReply.toLowerCase().startsWith("nitya:")) {
@@ -72,12 +72,11 @@ module.exports.handleEvent = async function ({ api, event }) {
          }
 
 
-        const replyText = `${botReply} 🥰`; // जवाब में से '- Rudra AI' हटाया ताकि Nitya खुद Rudra का नाम ले सके
-
+        const replyText = `${botReply} 🥰`;
 
         api.sendTypingIndicator(threadID, false); // Typing Indicator जवाब भेजने से पहले ऑफ करें
 
-        if (isReplyToBot && messageReply) {
+        if (isReplyToNitya && messageReply) { // **सिर्फ Nitya के रिप्लाई पर ही रिप्लाई करें**
             return api.sendMessage(replyText, threadID, messageReply.messageID);
         } else {
             return api.sendMessage(replyText, threadID, messageID);
@@ -87,6 +86,6 @@ module.exports.handleEvent = async function ({ api, event }) {
         console.error("Nitya Bot Error:", err);
         api.sendTypingIndicator(event.threadID, false);
         // Error मैसेज को और ज़्यादा Nitya persona में बना सकते हैं
-        return api.sendMessage("Aww, mere dimag mein thodi gadbad ho gayi Rudra ke sweetie... baad mein baat karte hain pyaar se! 💔", event.threadID, event.messageID); // Error मैसेज अपडेट किया
+        return api.sendMessage("Aww, mere dimag mein thodi gadbad ho gayi Rudra ke sweetie... baad mein baat karte hain pyaar se! 💔", event.threadID, event.messageID);
     }
 };
