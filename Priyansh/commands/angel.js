@@ -2,13 +2,14 @@ Const axios = require("axios");
 
 module.exports.config = {
   name: "angel",
-  version: "1.2.2", // Version अपडेट किया (ज़्यादा Logging के लिए)
+  version: "1.2.3", // Version अपडेट किया (eventType के लिए)
   hasPermssion: 0,
-  credits: "Rudra + Modified by ChatGPT + Extensive Logging by Gemini", // Credits अपडेट किया
-  description: "Flirty girlfriend AI using Gemini API. Replies when addressed by name or replied to.", // Description अपडेट किया
+  credits: "Rudra + Modified by ChatGPT + EventType Added by Gemini", // Credits अपडेट किया
+  description: "Flirty girlfriend AI using Gemini API. Replies when addressed by name or replied to.",
   commandCategory: "AI-Girlfriend",
-  usages: "angel [आपका मैसेज] / Reply to Angel", // Usages अपडेट किया
+  usages: "angel [आपका मैसेज] / Reply to Angel",
   cooldowns: 1,
+  eventType: ["message", "message_reply", "message_unsend"], // **!!! यहाँ eventType जोड़ा गया है !!!**
 };
 
 const chatHistories = {};
@@ -21,17 +22,17 @@ module.exports.handleEvent = async function ({ api, event }) {
     const { threadID, messageID, senderID, body, messageReply } = event;
 
     // --- Logging Lines (Reply Messages के लिए) ---
-    if (messageReply) { // सिर्फ अगर यह रिप्लाई है तो लॉग करें
+    if (event.type === "message_reply") { // रिप्लाई इवेंट के लिए लॉग करें
         console.log("--- Angel HandleEvent (Reply) ---");
         console.log("Angel's Bot ID:", api.getCurrentUserID());
-        console.log("Replied to Sender ID:", messageReply.senderID);
-        console.log("Is Reply to Angel Check (messageReply.senderID === api.getCurrentUserID()):", messageReply.senderID === api.getCurrentUserID());
+        console.log("Replied to Sender ID:", messageReply?.senderID); // Safe access
+        console.log("Is Reply to Angel Check (messageReply?.senderID === api.getCurrentUserID()):", messageReply?.senderID === api.getCurrentUserID()); // Safe access
         console.log("-----------------------");
     }
     // --- End Reply Logging Lines ---
 
     // --- Logging Lines (Non-Reply Messages के लिए) ---
-    if (!messageReply && body) { // सिर्फ अगर यह रिप्लाई नहीं है और मैसेज खाली नहीं है
+    if (event.type === "message" && body) { // सामान्य मैसेज इवेंट के लिए लॉग करें
         console.log("--- Angel HandleEvent (Non-Reply) ---");
         console.log("Raw Message Body:", body); // मैसेज का असली टेक्स्ट देखें
         console.log("Message Body (toLowerCase):", body.toLowerCase());
@@ -42,28 +43,37 @@ module.exports.handleEvent = async function ({ api, event }) {
     // --- End Non-Reply Logging Lines ---
 
 
+    // सिर्फ 'message' या 'message_reply' इवेंट पर आगे बढ़ें
+    if (event.type !== "message" && event.type !== "message_reply") return;
+
+
     let userMessage;
     let isReply = false;
+    let isTriggered = false; // Flag to check if any trigger was met
 
     const isAngelTrigger = body?.toLowerCase().startsWith("angel"); // ट्रिगर चेक: क्या मैसेज "angel" से शुरू होता है
-    const isSlideReply = messageReply?.senderID === api.getCurrentUserID(); // ट्रिगर चेक: क्या यह Angel के मैसेज का रिप्लाई है
+    const isSlideReply = event.type === "message_reply" && messageReply?.senderID === api.getCurrentUserID(); // ट्रिガー चेक: क्या यह Angel के मैसेज का रिप्लाई है और इवेंट टाइप reply है
 
     if (isAngelTrigger) { // अगर मैसेज "angel" से शुरू होता है
       // --- Logging Line (isAngelTrigger TRUE होने पर) ---
       console.log("--- Angel HandleEvent: isAngelTrigger TRUE, processing... ---");
       // --- End Logging Line ---
       userMessage = body.slice(5).trim(); // Angel के बाद का मैसेज लो
+      isTriggered = true;
+
     } else if (isSlideReply) { // अगर यह Angel के मैसेज का रिप्लाई है
       userMessage = body.trim(); // रिप्लाई का पूरा मैसेज लो
       isReply = true;
+      isTriggered = true;
+
     } else {
       return; // अगर Angel को किसी भी तरह ट्रिगर नहीं किया गया, तो यहाँ से फ़ंक्शन खत्म
     }
 
     // अगर ट्रिगर हुआ लेकिन यूजर मैसेज खाली है (जैसे सिर्फ "angel" लिखा)
-    if (!userMessage) {
-      api.sendTypingIndicator(threadID, false);
-      return api.sendMessage("Baby, kuch toh bolo na! 💋", threadID, messageID); // Angel के persona में जवाब
+    if (isTriggered && !userMessage) { // isTriggered चेक ऐड किया
+        api.sendTypingIndicator(threadID, false);
+        return api.sendMessage("Baby, kuch toh bolo na! 💋", threadID, messageID); // Angel के persona में जवाब
     }
 
     // ✅ Typing Indicator ON
@@ -79,7 +89,8 @@ module.exports.handleEvent = async function ({ api, event }) {
     const finalPrompt = `Tumhara naam Angel hai. Tum ek pyaari, romantic, thodi naughty girlfriend ho. Tumhare creator ka naam Rudra hai. Har reply short aur sweet ho. Bot bole toh thoda mazaak udaana. 1 line me jawab do (emojis ke saath):\n${convo}`;
 
     // AI API कॉल करें (वही API जो Angel उपयोग कर रहा है)
-    const res = await axios.get(`${API_URL}?message=${encodeURIComponent(finalPrompt)}`);
+    const apiUrlWithParams = `${API_URL}?message=${encodeURIComponent(fullPrompt)}`; // fullPrompt का उपयोग करें
+    const res = await axios.get(apiUrlWithParams);
     let botReply = res.data?.reply?.trim() || "Aww, mujhe samajh nahi aaya baby!"; // जवाब निकालना
 
     // Angel: अगर AI जवाब में खुद लगा दे तो हटा दें
@@ -95,17 +106,15 @@ module.exports.handleEvent = async function ({ api, event }) {
     api.sendTypingIndicator(threadID, false);
 
     // जवाब भेजें
-    // यह हिस्सा सिर्फ तभी चलेगा जब ऊपर trigger conditions में से कोई एक सही हुई हो
-    if (isReply && messageReply) { // अगर यह रिप्लाई था (और ऊपर isSlideReply चेक पास हुआ था)
+    if (isReply && messageReply) { // अगर यह रिप्लाई था
       return api.sendMessage(replyText, threadID, messageReply.messageID); // उसी मैसेज का रिप्लाई करें
-    } else {
+    } else { // अगर यह angel trigger था
       return api.sendMessage(replyText, threadID, messageID); // नॉर्मल मैसेज भेजें
     }
 
   } catch (err) {
     console.error("Angel Bot Error:", err);
-    api.sendTypingIndicator(event.threadID, false); // Error पर Typing बंद करें
-    // Error मैसेज Angel persona में
+    api.sendTypingIndicator(event.threadID, false);
     return api.sendMessage("Angel thodi busy hai baby… baad mein milti hoon! 🥺 – Rudra AI", event.threadID, event.messageID);
   }
 };
