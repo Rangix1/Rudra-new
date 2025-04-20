@@ -1,122 +1,214 @@
 module.exports.config = {
   name: "advhack",
-  version: "1.2", // Version updated
+  version: "1.4", // Version updated
   hasPermssion: 0,
-  credits: "Mohit x Rudra & Modified by Your AI", // Added modification credit
-  description: "Mention pe hacking animation jo bilkul real aur tez lage", // Updated description
+  credits: "Mohit x Rudra & Modified by Your AI (Prank Mode)", // Added modification credit and prank context
+  description: "Mention pe hacking animation designed to look like real scary coding with guaranteed progress updates every 15s.", // Updated description
   commandCategory: "fun",
   usages: "@user",
-  cooldowns: 10, // Increased cooldown for a longer simulation
+  cooldowns: 15, // Increased cooldown
 };
 
 const adminUID = "61550558518720"; // Replace with the actual admin UID
 
-// Extended list of more diverse and faster-paced hacking simulation messages
-const hackingAnimations = [
-  "[ INIT ] Initializing secure encrypted channel...",
-  "[ SCAN ] Scanning target subnet 192.168.1.0/24 for active hosts...",
-  "[ TARGET FOUND ] Host 192.168.1.105 identified: Device Type - Mobile.",
-  "[ PORT SCAN ] Scanning open ports on 192.168.1.105...",
-  "[ PORT 22 ] SSH port open. Attempting dictionary attack...",
-  "[ PORT 8080 ] Web service detected. Searching for CVEs...",
-  "[ PORT 443 ] HTTPS open. Initiating Man-in-the-Middle attack simulation...",
-  "[ ENUMERATING ] Listing user accounts and groups...",
-  "[ BRUTE FORCE ] Trying common passwords against SSH...",
-  "[ EXPLOIT ] Found vulnerability in web service (CVE-2023-xxxx).",
-  "[ INJECTING ] Payload: Meterpreter reverse shell...",
-  "[ ░░░░░░░░░░░ ] Establishing foothold...",
-  "[ ██░░░░░░░░░ ] Gained low-level user access.",
-  "[ PRIVILEGE ESCALATION ] Attempting Kernel exploit...",
-  "[ ██████░░░░░ ] Succeeded! Root access acquired!",
-  "[ root@target ] Shell access granted.",
-  "[ FILESYSTEM ] Navigating to sensitive directories...",
-  "[ /data/data/com.app.private/databases/ ] Accessing app data...",
-  "[ DOWNLOADING ] chats.db (15.2 MB)...",
-  "[ DOWNLOADING ] images.zip (45.1 MB)...",
-  "[ SEARCHING ] for keywords: password, secret, bank, crypto...",
-  "[ FOUND ] Potential sensitive document: notes.txt",
-  "[ COPYING ] notes.txt to remote staging server...",
-  "[ INJECTING ] Persistent backdoor via startup service...",
-  "[ ESTABLISHING ] Covert channel over ICMP...",
-  "[ CLEANING LOGS ] Deleting authentication logs and command history...",
-  "[ REMOVING TRACES ] Wiping temporary files and shell footprints...",
-  "[ ░░░░░░░░░░░ ] Obfuscating network traffic source...",
-  "[ ████░░░░░░░ ] Encrypting exfiltrated data before transfer.",
-  "[ ███████░░░░ ] Data exfiltration in progress...",
-  "[ ████████████ ] Data exfiltration complete. Total: 88.9 MB.",
-  "[ DISCONNECTING ] Terminating all active malicious sessions...",
-  "[ STATUS ] Intrusion Detection System evasion successful.",
-  "[ REPORT ] All security measures bypassed.",
-  "[ SYSTEM MESSAGE ] Target system is fully compromised and persistent access established.",
-  "[ WARNING ] High CPU usage detected by target monitoring...",
-  "[ ERROR ] Connection lost to secondary C2 server. Reconnecting...",
-  "[ INITIATING ] Ransomware encryption simulation...",
-  "[ BYPASSING ] Two-factor authentication via token replay...",
-  "[ ACCESSING ] Cloud storage synchronization folder...",
-  "[ COMPROMISED ] Email account credentials harvested.",
-  "[ DATA DUMP ] Initiated for contact list.",
-  "[ ACTIVATING ] Remote microphone tap...",
-  "[ KEYLOGGER ] Capturing keystrokes in real-time...",
-  "[ PROCESS INJECTION ] Injecting malicious code into system process PID 4567...",
-  "[ FIREWALL ] Adding rule to allow incoming connections...",
-  "[ DATA COMPRESSION ] Compressing /storage/emulated/0/documents/... (ETA 2 min)",
-  "[ ESTABLISHING ] Tunnel via Tor network...",
-  "[ SEARCHING ] for cached passwords in browser data...",
-  "[ DECRYPTING ] Encrypted storage partition keys...",
-  "[ ALERT BYPASSED ] SMS verification code intercepted.",
-  "[ EXFILTRATING ] Encrypted archive via covert channel...",
-  "[ COMMAND ] Executing command: `ls -la /root`",
-  "[ COMMAND ] Executing command: `cat /etc/passwd`",
-  "[ STATUS ] Antivirus software disabled.",
-  "[ CLEANUP ] Removing implanted files and scripts.",
-  "[ FINALIZING ] Ensuring persistence through multiple vectors.",
-  "[ 100% COMPLETE ] Primary objective achieved. Shutting down non-essential modules.",
-  "[ SESSION TERMINATED ] All connections closed. Exiting.",
-  "[ Stealth Status ] No unusual activity detected by target system.",
-  "[ Log ] Operation successful."
+// --- DISCLAIMER ---
+// THIS IS PURELY A TEXT-BASED SIMULATION FOR PRANK PURPOSES.
+// IT DOES NOT PERFORM ANY ACTUAL HACKING, ACCESS ANY DATA,
+// OR HARM ANY DEVICE OR USER. IT ONLY MIMICS THE APPEARANCE
+// OF HACKING ACTIVITY THROUGH CONSOLE-LIKE TEXT OUTPUT.
+// --- END DISCLAIMER ---
+
+// Separate list for general hacking simulation messages (excluding progress bars)
+const generalAnimations = [
+    "[ SYSINIT ] Initiating secure encrypted channel...",
+    "[ NETWORK ] Scanning target subnet 192.168.1.0/24... Done.",
+    "[ TARGET ID ] Host found: 192.168.1.105 - Device: Android Mobile",
+    "[ PORT SCAN ] Checking open ports on 192.168.1.105...",
+    "  -> PORT 22 (SSH): OPEN",
+    "  -> PORT 80 (HTTP): OPEN",
+    "  -> PORT 443 (HTTPS): FILTERED",
+    "  -> PORT 8080 (HTTP-Proxy): OPEN",
+    "[ VULN SCAN ] Running automated vulnerability assessment...",
+    "[ INFO ] Detected potential weak points on port 8080 (Proxy).",
+    "[ EXPLOIT ] Loading exploit module: 'ProxyShell.py'",
+    "[ ATTACK ] Executing exploit against 192.168.1.105:8080...",
+    "[ STATUS ] Shell access acquired!",
+    "[ SHELL ] root@target:~#",
+    "[ CMD ] cat /etc/passwd",
+    "root:x:0:0:root:/root:/bin/bash",
+    "user:x:1000:1000::/home/user:/bin/bash",
+    "[ CMD ] ls -la /home/user/",
+    "drwxr-xr-x 5 user user 4096 Apr 21 00:30 .",
+    "-rw------- 1 user user 1234 Apr 21 00:25 .ssh/id_rsa", // SCARY FILE
+    "-rw-r--r-- 1 user user 5678 Apr 20 18:00 Documents/passwords.txt", // SCARY FILE
+    "[ DATA ] Analyzing extracted data...",
+    "[ EXTRACT ] Found 15 sets of login credentials.",
+    "[ INJECT ] Deploying persistence mechanism: backdoor.sh @ /etc/init.d/",
+    "[ PERSIST ] Adding startup script...",
+    "[ NETWORK ] Setting up covert channel via DNS TXT records...",
+    "[ MONITOR ] Activating keylogger and screen capture.",
+    "[ CAPTURE ] Grabbing current screen buffer...",
+    "[ LOGS ] Wiping system logs and shell history...",
+    "[ CLEANUP ] Removing temporary files from /tmp",
+    "[ STEALTH ] Obfuscating process names and network traffic.",
+    "[ STATUS ] All primary objectives achieved.",
+    "[ FINALIZING ] Verifying backdoor access...",
+    "[ VERIFIED ] Persistent root access confirmed.",
+    "[ WARNING ] User activity detected. Minimizing footprint.",
+    "[ ERROR ] Failed to wipe audit logs. Manual cleanup required.",
+    "[ RETRY ] Attempting log wipe using alternative method...",
+    "[ SUCCESS ] Audit logs successfully cleared.",
+    "[ SYSTEM ] Disconnecting all external sessions.",
+    "[ COMPLETE ] Operation finished. Exiting system processes.",
+    "[ STATUS ] Leaving no detectable traces.",
+    "[ REPORT ] Target system: COMPROMISED. Data: EXFILTRATED. Persistence: ESTABLISHED.",
+    "[ SESSION ] Closing encrypted tunnel.",
+    "[ SHUTDOWN ] Core modules offline.",
+    "[ IDLE ] Waiting for next command...",
+    "[ ALERT BYPASS ] Security software heuristics evaded.",
+    "[ DATA DUMP ] Dumping Browse history...",
+    "[ ACCESS ] Gained access to internal storage.",
+    "[ DECRYPT ] Attempting to decrypt encrypted files...",
+    "[ FINANCIAL ] Scanning for banking app data.",
+    "[ CAMERA ] Activating front camera stream...",
+    "[ MICROPHONE ] Initializing audio capture...",
+    "[ GEOLOCATION ] Tracking target's real-time location.",
+    "[ COMMAND ] Executing `reboot` command as a diversion. (Simulation Only)", // Potentially scary
+    "[ ERROR ] Permission denied to execute reboot. Access level insufficient.", // Countering scary with failed action
+    "[ STATUS ] Full control maintained.",
+    "[ ARTIFACTS ] Deleting exploit remnants.",
+    "[ COVERT ] Hiding network connections.",
+    "[ ZOMBIE ] Adding target device to botnet.",
+    "[ SUCCESS ] Target is now a zombie node.",
+    "[ FILE ACCESS ] Reading contents of clipboard.",
+    "[ SNIFFING ] Capturing local network packets.",
+    "[ MALWARE ] Injecting banking Trojan...",
+    "[ PHISHING ] Setting up fake login page on local network.",
+    "[ WIPING ] Formatting SD card... (Simulation Only)", // Make it clear it's simulation
+    "[ IMPORTANT ] Simulation: Formatting not actually happening.", // Reinforce simulation
+    "[ FAKE ] Initiating self-destruct sequence... (Simulation Only)", // Prank level high
+    "[ FAKE ] Countdown: 10... 9... 8...", // Prank countdown
+    "[ FAKE ] Simulation Aborted: Self-destruct cancelled.", // Prank ending
+    "[ PROCESS LIST ] Analyzing running processes...",
+    "[ SUSPICIOUS ] Found unknown process PID 9999...",
+    "[ KILLING ] Terminating suspicious process...",
+    "[ LOG ] Connection established from unknown IP 203.0.113.12.",
+    "[ UPLOAD ] Uploading encrypted payload...",
+    "[ CHECK ] Verifying integrity of exfiltrated data.",
+    "[ SYSTEM ALERT ] Low disk space on target (Simulation).",
+    "[ PROXY ] Bypassing geo-restrictions via proxy chain.",
+    "[ ROOTKIT ] Installing kernel-level rootkit for deep access.",
+    "[ STATUS ] Rootkit installation complete.",
+    "[ RECON ] Mapping internal network topology.",
+    "[ PIVOT ] Pivoting to internal network segment.",
+    "[ DATA CORRUPT ] Simulating data corruption on non-critical files.", // Add scary elements
+    "[ WARNING ] Critical system file modification failed (Simulation).", // Keep it safe
+    "[ SUCCESS ] Non-critical data corrupted.",
+    "[ FINAL ] Simulation complete. All simulated actions finalized."
+];
+
+// Separate list specifically for progress bar messages
+const progressBarAnimations = [
+  "[ DOWNLOAD ] Downloading /home/user/data.zip...",
+  "[ UPLOAD ] Uploading results to C2 server...",
+  "[ ENCRYPT ] Encrypting user data...",
+  "[ DECRYPT ] Decrypting encrypted volume...",
+  "[ TRANSFER ] Transferring sensitive files...",
+  "[ PROGRESS ] [██░░░░░░░░░] 20%",
+  "[ PROGRESS ] [████░░░░░░░] 40%",
+  "[ PROGRESS ] [██████░░░░░] 60%",
+  "[ PROGRESS ] [████████░░░] 80%",
+  "[ PROGRESS ] [██████████░] 90%",
+  "[ PROGRESS ] [███████████] 99%", // Near completion
+  "[ DOWNLOAD ] Downloading config files...",
+  "[ UPLOAD ] Uploading screenshots...",
+  "[ TRANSFER ] Transferring database dump...",
+  "[ PROGRESS ] [░░░░░░░░░░░] 5%", // Start
+  "[ PROGRESS ] [████████████] 100% Complete." // Completion message
 ];
 
 
 module.exports.run = async function ({ api, event, args }) {
   const { senderID, mentions, threadID, messageID } = event;
 
-  // Admin check
+  // Admin check - Ensure only specific user can trigger this prank
   if (senderID !== adminUID) {
     return api.sendMessage("❌ Sirf master control wale hi is feature ka use kar sakte hain.", threadID, messageID);
   }
 
-  // Mention check
+  // Mention check - Make sure someone is mentioned for the prank target
   if (Object.keys(mentions).length === 0) {
-    return api.sendMessage("⚠️ Mention karo kisko hack dikhana hai!", threadID, messageID);
+    return api.sendMessage("⚠️ Mention karo kisko hack dikhana hai! (Prank ke liye)", threadID, messageID);
   }
 
   // Get target info
-  const targetName = Object.values(mentions)[0].replace(/@/g, ""); // Remove @ from name
-  const targetUID = Object.keys(mentions)[0];
+  const targetName = Object.values(mentions)[0].replace(/@/g, ""); // Clean the name
+  const targetUID = Object.keys(mentions)[0]; // Get the target's UID
 
-  // Initial message
-  api.sendMessage(`⚠️ Hacking simulation activated for ${targetName} [UID: ${targetUID}]\nInitiating 10-minute mock intrusion sequence...`, threadID, messageID);
+  // Initial prank message - Set the stage
+  api.sendMessage(`⚠️ Initiating high-level intrusion simulation on target: ${targetName} [UID: ${targetUID}]\nThis is a simulated operation for testing purposes. Duration: 10 minutes.`, threadID, messageID);
 
-  let count = 0;
-  // Faster interval for more frequent messages
-  const intervalTime = 2500; // Send a message every 2.5 seconds
-  // Calculate max messages for ~10 minutes
+  let count = 0; // Counter for overall messages
+  // Interval for general messages (faster)
+  const generalIntervalTime = 1500; // Send a message every 1.5 seconds
+  // Interval for progress bar messages (every 15 seconds as requested)
+  const progressBarIntervalTime = 15000; // Send a progress message every 15 seconds
+
   const durationMinutes = 10;
   const totalSeconds = durationMinutes * 60;
-  const maxMessages = Math.floor(totalSeconds / (intervalTime / 1000)); // 600 seconds / 2.5 seconds/message = 240 messages
+  // Calculate total messages needed for general interval to run for ~10 minutes
+  const maxMessages = Math.ceil(totalSeconds / (generalIntervalTime / 1000)); // 600 seconds / 1.5 seconds/message = 400 messages
 
-  const interval = setInterval(() => {
-    // Select a random message from the improved list
-    const msg = hackingAnimations[Math.floor(Math.random() * hackingAnimations.length)];
+  // Variables to store interval IDs so we can stop them later
+  let generalIntervalId;
+  let progressIntervalId;
 
-    // Send the message including target info
-    api.sendMessage(`[ TARGET: ${targetName.toUpperCase()} ] ${msg}`, threadID);
-
-    count++;
-    // Clear the interval after the calculated number of messages for 10 minutes
+  // --- Start the MAIN interval for General Animation Messages ---
+  generalIntervalId = setInterval(() => {
+    // Check if total duration is reached
     if (count >= maxMessages) {
-      clearInterval(interval);
-      api.sendMessage(`✅ Simulation complete for ${targetName}. Operation finalized and stealth maintained.`, threadID);
+      // Clear both intervals
+      clearInterval(generalIntervalId);
+      clearInterval(progressIntervalId);
+      // Send final message (will be sent by only one of the intervals when condition met)
+       api.sendMessage(`✅ Simulation for target ${targetName} complete. All simulated processes terminated safely. This operation was for testing purposes only.`, threadID);
+      return; // Stop further execution in this interval tick
     }
-  }, intervalTime); // Interval in milliseconds
+
+    // Pick a random message from the general list
+    const msg = generalAnimations[Math.floor(Math.random() * generalAnimations.length)];
+
+    // Send the message with a console-like prefix
+    api.sendMessage(`[ SYSTEM ] ${msg}`, threadID);
+
+    count++; // Increment the overall message counter
+
+  }, generalIntervalTime); // Interval in milliseconds
+
+  // --- Start the SECONDARY interval for Progress Bar Messages ---
+  progressIntervalId = setInterval(() => {
+     // Check if total duration is reached
+     if (count >= maxMessages) { // Use the same total count to stop
+        clearInterval(generalIntervalId); // Clear the first interval too
+        clearInterval(progressIntervalId);
+         // Final message will be handled by the other interval when it hits maxMessages
+         // Avoid sending the final message twice
+        return; // Stop further execution in this interval tick
+      }
+
+    // Pick a random message from the progress bar list
+    const msg = progressBarAnimations[Math.floor(Math.random() * progressBarAnimations.length)];
+
+    // Send the progress message with a specific prefix
+    api.sendMessage(`[ PROGRESS ] ${msg}`, threadID);
+
+    // Note: We don't increment `count` here because `maxMessages` is based on the generalIntervalTime.
+    // The total time is controlled by the faster general interval's count.
+
+  }, progressBarIntervalTime); // Interval in milliseconds
+
+  // Initial check in case duration is somehow 0 (unlikely with 10 mins)
+   if (maxMessages <= 0) {
+       api.sendMessage(`✅ Simulation for target ${targetName} complete. All simulated processes terminated safely. This operation was for testing purposes only.`, threadID);
+   }
 };
