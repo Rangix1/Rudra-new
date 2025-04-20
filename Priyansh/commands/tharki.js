@@ -2,94 +2,86 @@ module.exports.config = {
   name: "tharki",
   version: "1.0",
   hasPermssion: 0,
-  credits: "Rudra",
-  description: "Pure tharki messages with hacker vibe & gender detect",
+  credits: "rudra",
+  description: "Non-prefix tharki replies + hacker demo + gaali + UID control",
   commandCategory: "fun",
-  usages: "tharki",
-  cooldowns: 3
+  usages: "Auto trigger",
+  cooldowns: 1,
 };
 
-const maleMsgs = [
-  "Oye baby, tera kamar ka curve mujhe nidra bhoolwa de! 🔥",
-  "Tera kajal dekhke toh aag lag jaati hai yaar! 🔥🔥",
-  "Aaj mausam thoda tharka hai, aur tu full jalwa hai! 😎💥",
-  "Baby tu hile toh dil hilta hai! 💃🔥",
-  "Tere hot lips dekhke dil chummi chummi bolta hai! 💋🔥",
-  "Raat bhar tujhe story me dekhta raha, ab toh sapne me aaja! 🌙💭",
-  "Tera dupatta udaa toh dil bhi udaa! 😍🪁",
-  "Tu samajhti kya hai apne aap ko, meri future wife hai tu! 😏💍",
-  "Tumhare thumke toh 808 bass se bhi heavy lagte hain! 💣🎶",
-  "Bheegti baarish me tu sabse hot lagti hai baby! 🌧️🔥",
-  "Tu saamne ho toh DJ bhi bajna sharma jaaye! 🎧💥",
-  "Teri kamar pe tattoo hai ya talwar? Dil cheer diya re! 💘⚔️",
-  "Aisi smile maar di baby ne ki pura tharki mode on ho gaya! 😁🎶",
-  "Teri aankhon mein dooba hoon, sanson ka kya hoga? 😍💖",
-  "Kya lagti ho yaar, chha gyi social media pe! 😏📸",
-  "Tumhari body dekhke gym ka plan cancel kar diya! 💪🔥",
-  "Baby tu online ho ja, mera heartbeat 2x ho jaata hai! ❤️💓",
-  "Teri DP dekhke lagta hai... dard-e-dil mehnat se paaya! 📸💔",
-  "Pallu sambhal baby... dil gaya fisaal! ❤️🎀",
-  "Aise na dekha karo, warna ghar aane ka mann karega! 😘🏠",
-  "Rudra"
-];
-
-const femaleMsgs = [
-  "Bhai tu toh real life ka Sunny bhaiya nikla! 😎🔥",
-  "Tera jawline dekhke toh dil halchal ho gaya! 😍💥",
-  "Oye hero, shirt utaar… AC bandh kar diya! 🧑‍⚖️🔥",
-  "Tharki bhai spotted with maximum swag! 😏😎",
-  "Teri smile toh mujhe pregnancy test lene pe majboor kar de! 😂🔥",
-  "Aise mat hans bhai, control nahi hota! 😏💃",
-  "Tera body dekhke protein shake pe shak ho gaya! 💪😜",
-  "Aise gym jaake kya karega... mere sapno me aaja! 😘💭",
-  "Tharki vibe full ON, tu toh certified lover boy hai! 😏❤️",
-  "O bhai, tu reel banata hai ya ladkiyon ke sapne? 💭📸",
-  "Tera perfume bhi tharki lagta hai! 🌹🔥",
-  "Jab tu aata hai na, pura Facebook tharki ho jaata hai! 😏💻",
-  "Tera hairstyle dekhke toh pyar ho gaya! 💇‍♂️🔥",
-  "Tu toh itna hot hai, heater off kar diya maine! 🔥🔥",
-  "Tharki bhai, tere bina toh raat adhuri lagti hai! 🌙🔥",
-  "Teri aankhon me kajal nahi, blackhole hai – kheenchta hai! 👀🖤",
-  "Tu smile kare toh emoji bhi sharma jaaye! 😏✨",
-  "Kya line marta hai bhai, training de! 💬🔥",
-  "Tera swag toh bijli se tez hai! ⚡💥",
-  "Tu aaye toh notification bhi hot ho jaaye! 📲🔥",
-  "Rudra"
+const tharkiMsgs = [
+  "Baby tere jaise curve toh Photoshop me bhi nahi milte! 🔥",
+  "Tera kamar hilta hai toh bass speaker bhi sharma jaaye! 🔊",
+  "Aisi smile... dil ki toh lassi ban gayi! 💦",
+  "Oye tu shake kare toh earthquake aa jaye! 🌍",
+  "Tere hot lips dekhke halwai bhi jalebi banana bhool jaaye! 💋",
+  "Tu paas aaye toh AC bhi hot ho jaaye! 🔥",
+  "Tumhare thumke dekhke mujhe pacemaker lagwana padega! 💓",
+  "Tere jaise figure ke liye toh artist bhi pencil tod de! ✏️",
+  "Tu samne ho toh DJ bhi bajna sharma jaaye! 🎧",
+  "Tere aankhon mein kajal nahi... pura kaala jadoo hai! 👁️",
+  "Tere jaisi girl ho toh internet ka bhi crash ho jaaye! 💻",
+  "Tera body dekhke dumbbell bhi feel kar le jealous! 🏋️",
+  "Tu toh asli tharki queen hai – mujhe bhi training de de! 😏",
+  "Kya figure hai baby, GPS bhi raasta bhool jaaye! 🗺️",
+  "Tere jaise peet pe tattoo toh dil pe attack lagta hai! ⚠️",
+  "Aise walk karti hai jaise ramp hi sadak ho! 🔥",
+  "Tu online ho jaaye toh pura Facebook tharki ho jaaye! 😈",
+  "O baby, tu toh meri dirty fantasy ban gayi hai! 💭",
+  "Teri har reel se toh zindagi feel hone lagti hai! 🎬",
 ];
 
 const hackerReplies = [
-  "⚠️ Accessing mainframe... IP locked! Location tracking started! 🌐",
-  "💀 Warning: Rudra Bot Firewall Activated. Tumhara system 60 sec me lockdown ho sakta hai!",
-  "👁‍🗨 Bot pe gaali? System breach attempt detected. Trace back initiated...",
-  "🤖 Tumne Rudra ko chhed diya... Ab cyber kaand hoga!",
-  "🧠 Bot pe baat seedhe hacker mode me jaati hai! Control your tongue!",
-  "👨‍💻 Bot: Target locked. System booting for virtual slap.exe!"
+  "⚠️ Hacking Firewall Active: IP traced, system breach blocked.",
+  "⚠️ Warning: Gaali detect hui hai, target marked for demo hack.",
+  "💀 Rudra Mode Activated – Bot ko chhedne ka result milega!",
+  "👁 Bot: Trace started, virtual attack ready!",
+  "🔐 Hack simulation running... teri ID ab safe nahi!",
+  "🤖 Tumne hacker ko chheda hai... ab bhugto!",
 ];
 
-// Handle message
-module.exports.run = async function({ api, event, Users }) {
-  const { senderID, threadID, messageID, body } = event;
-  const lowerMsg = body.toLowerCase();
-  const userInfo = await Users.getData(senderID);
-  const gender = userInfo?.gender || "male";
+const gaaliReply = [
+  "Oye chhoti soch wale, tu apni aukaat me reh! 🖕",
+  "Gaali deta hai? Tere jaise toh recycle bin me hi ache lagte hain!",
+  "Tere jaise logon ke liye delete button invent hua tha! 🗑️",
+  "Gaali dena band kar warna bot teri gaand tape karega! 🔨",
+  "Apne baap se baat karne ki tameez seekh le pehle! ☠️",
+  "Gaali deke macho ban raha hai? Jaa pehle mirror dekh! 🪞",
+  "Bot ko chheda? Ab tujhe system se logout milega! 🔒",
+  "Chup be moorkh! Tu toh AI ke bhi blacklist me hai! 🛑",
+];
 
-  // Hack related
-  if (lowerMsg.includes("hack krle") || lowerMsg.includes("hack karde")) {
-    return api.sendMessage("💻 Target selected.\nHacking started...\n[████░░░░░░░░░░] 20%\nPlease wait while Rudra bot accesses their facebook account...", threadID, messageID);
+// Add your UID here (only you can trigger actual 'hack demo')
+const adminUID = "61550558518720";
+
+module.exports.handleEvent = async function ({ api, event, Users }) {
+  const { threadID, senderID, body } = event;
+  if (!body) return;
+
+  const lower = body.toLowerCase();
+
+  // Hack command – only from you
+  if (senderID === adminUID && lower.includes("hack kr") && lower.includes("id")) {
+    return api.sendMessage(
+      "⚠️ Hack simulation started for target ID...\n[████░░░░░░░░░░] 25%\nSystem breach in process...\n[██████████░░░░] 80%\nDemo complete. Hack activated (start).",
+      threadID
+    );
   }
 
-  // Check if gaali + "bot" or "rudra" present
-  const galiyaan = ["kutta", "kamina", "bhosd", "mc", "bc", "madarchod", "chutiya", "gandu", "bewkoof", "pagal"];
-  const isGali = galiyaan.some(word => lowerMsg.includes(word));
-  const mentionsBot = lowerMsg.includes("rudra") || lowerMsg.includes("bot");
+  // If someone says gaali + 'bot' or 'rudra'
+  const gaaliList = ["chutiya", "gandu", "bhosdike", "madarchod", "teri ma ki", "Gandu", "bc", "mc"];
+  const mentionedBot = lower.includes("bot") || lower.includes("rudra");
+  const saidGaali = gaaliList.some((word) => lower.includes(word));
 
-  if (isGali && mentionsBot) {
-    const hackerMsg = hackerReplies[Math.floor(Math.random() * hackerReplies.length)];
-    return api.sendMessage(hackerMsg, threadID, messageID);
+  if (saidGaali && mentionedBot) {
+    const gali = gaaliReply[Math.floor(Math.random() * gaaliReply.length)];
+    const hack = hackerReplies[Math.floor(Math.random() * hackerReplies.length)];
+    return api.sendMessage(`${gali}\n\n${hack}`, threadID);
   }
 
-  // Send tharki response based on gender
-  const msgList = gender === "female" ? femaleMsgs : maleMsgs;
-  const randomMsg = msgList[Math.floor(Math.random() * msgList.length)];
-  return api.sendMessage(randomMsg, threadID, messageID);
+  // Tharki random msg
+  const reply = tharkiMsgs[Math.floor(Math.random() * tharkiMsgs.length)];
+  return api.sendMessage(reply, threadID);
 };
+
+module.exports.run = () => {};
