@@ -1,22 +1,29 @@
+const axios = require('axios'); // Required for downloading profile picture
+const fs = require('fs-extra'); // Required for file handling (reading/deleting)
+const path = require('path');   // Required for handling file paths
+
 module.exports.config = {
   name: "advhack",
-  version: "1.4", // Version updated
+  version: "1.7", // Version updated
   hasPermssion: 0,
-  credits: "Mohit x Rudra & Modified by Your AI (Prank Mode)", // Added modification credit and prank context
-  description: "Mention pe hacking animation designed to look like real scary coding with guaranteed progress updates every 15s.", // Updated description
+  credits: "Mohit x Rudra & Modified by Your AI (Ultimate Prank Mode)", // Added modification credit and prank context
+  description: "Complete 5-min fast hacking animation (progress, fake login+pic), fake security alert DM, and final message to admin in group.", // Updated description
   commandCategory: "fun",
   usages: "@user",
-  cooldowns: 15, // Increased cooldown
+  cooldowns: 15, // Cooldown for prank duration + aftermath
 };
 
 const adminUID = "61550558518720"; // Replace with the actual admin UID
 
-// --- DISCLAIMER ---
-// THIS IS PURELY A TEXT-BASED SIMULATION FOR PRANK PURPOSES.
-// IT DOES NOT PERFORM ANY ACTUAL HACKING, ACCESS ANY DATA,
-// OR HARM ANY DEVICE OR USER. IT ONLY MIMICS THE APPEARANCE
-// OF HACKING ACTIVITY THROUGH CONSOLE-LIKE TEXT OUTPUT.
-// --- END DISCLAIMER ---
+// --- EXTREME PRANK WARNING & DISCLAIMER ---
+// THIS MODULE CONTAINS FEATURES THAT SEND FAKE SECURITY ALERTS
+// AND MIMIC HACKING ACTIVITY. IT IS SOLELY FOR EXTREME PRANK PURPOSES
+// AND IS NOT REAL. USING THIS MAY CAUSE DISTRESS TO THE RECIPIENT.
+// USE THIS FEATURE RESPONSIBLY AND ONLY ON PEOPLE WHO WILL UNDERSTAND
+// IT IS A HARMLESS JOKE AFTERWARDS. DO NOT USE ON EASILY DISTRESSED
+// INDIVIDUALS, ELDERLY, OR IN ANY SITUATION WHERE IT COULD CAUSE REAL HARM.
+// THE CODE DOES NOT PERFORM ANY ACTUAL HACKING OR DATA BREACH.
+// --- END WARNING & DISCLAIMER ---
 
 // Separate list for general hacking simulation messages (excluding progress bars)
 const generalAnimations = [
@@ -73,8 +80,8 @@ const generalAnimations = [
     "[ CAMERA ] Activating front camera stream...",
     "[ MICROPHONE ] Initializing audio capture...",
     "[ GEOLOCATION ] Tracking target's real-time location.",
-    "[ COMMAND ] Executing `reboot` command as a diversion. (Simulation Only)", // Potentially scary
-    "[ ERROR ] Permission denied to execute reboot. Access level insufficient.", // Countering scary with failed action
+    "[ COMMAND ] Executing `reboot` command as a diversion. (Simulation Only)",
+    "[ ERROR ] Permission denied to execute reboot. Access level insufficient.",
     "[ STATUS ] Full control maintained.",
     "[ ARTIFACTS ] Deleting exploit remnants.",
     "[ COVERT ] Hiding network connections.",
@@ -84,11 +91,11 @@ const generalAnimations = [
     "[ SNIFFING ] Capturing local network packets.",
     "[ MALWARE ] Injecting banking Trojan...",
     "[ PHISHING ] Setting up fake login page on local network.",
-    "[ WIPING ] Formatting SD card... (Simulation Only)", // Make it clear it's simulation
-    "[ IMPORTANT ] Simulation: Formatting not actually happening.", // Reinforce simulation
-    "[ FAKE ] Initiating self-destruct sequence... (Simulation Only)", // Prank level high
-    "[ FAKE ] Countdown: 10... 9... 8...", // Prank countdown
-    "[ FAKE ] Simulation Aborted: Self-destruct cancelled.", // Prank ending
+    "[ WIPING ] Formatting SD card... (Simulation Only)",
+    "[ IMPORTANT ] Simulation: Formatting not actually happening.",
+    "[ FAKE ] Initiating self-destruct sequence... (Simulation Only)",
+    "[ FAKE ] Countdown: 10... 9... 8...",
+    "[ FAKE ] Simulation Aborted: Self-destruct cancelled.",
     "[ PROCESS LIST ] Analyzing running processes...",
     "[ SUSPICIOUS ] Found unknown process PID 9999...",
     "[ KILLING ] Terminating suspicious process...",
@@ -101,30 +108,31 @@ const generalAnimations = [
     "[ STATUS ] Rootkit installation complete.",
     "[ RECON ] Mapping internal network topology.",
     "[ PIVOT ] Pivoting to internal network segment.",
-    "[ DATA CORRUPT ] Simulating data corruption on non-critical files.", // Add scary elements
-    "[ WARNING ] Critical system file modification failed (Simulation).", // Keep it safe
+    "[ DATA CORRUPT ] Simulating data corruption on non-critical files.",
+    "[ WARNING ] Critical system file modification failed (Simulation).",
     "[ SUCCESS ] Non-critical data corrupted.",
-    "[ FINAL ] Simulation complete. All simulated actions finalized."
+    // Add more general messages if needed
 ];
 
 // Separate list specifically for progress bar messages
 const progressBarAnimations = [
-  "[ DOWNLOAD ] Downloading /home/user/data.zip...",
-  "[ UPLOAD ] Uploading results to C2 server...",
-  "[ ENCRYPT ] Encrypting user data...",
-  "[ DECRYPT ] Decrypting encrypted volume...",
-  "[ TRANSFER ] Transferring sensitive files...",
-  "[ PROGRESS ] [██░░░░░░░░░] 20%",
-  "[ PROGRESS ] [████░░░░░░░] 40%",
-  "[ PROGRESS ] [██████░░░░░] 60%",
-  "[ PROGRESS ] [████████░░░] 80%",
-  "[ PROGRESS ] [██████████░] 90%",
-  "[ PROGRESS ] [███████████] 99%", // Near completion
-  "[ DOWNLOAD ] Downloading config files...",
-  "[ UPLOAD ] Uploading screenshots...",
-  "[ TRANSFER ] Transferring database dump...",
-  "[ PROGRESS ] [░░░░░░░░░░░] 5%", // Start
-  "[ PROGRESS ] [████████████] 100% Complete." // Completion message
+  "Downloading data.zip...",
+  "Uploading results to C2 server...",
+  "Encrypting user data...",
+  "Decrypting encrypted volume...",
+  "Transferring sensitive files...",
+  "[██░░░░░░░░░] 20%",
+  "[████░░░░░░░] 40%",
+  "[██████░░░░░] 60%",
+  "[████████░░░] 80%",
+  "[██████████░] 90%",
+  "[███████████] 99%", // Near completion
+  "Downloading config files...",
+  "Uploading screenshots...",
+  "Transferring database dump...",
+  "[░░░░░░░░░░░] 5%", // Start
+  "[████████████] 100% Complete." // Completion message
+  // Add more progress messages if needed
 ];
 
 
@@ -145,23 +153,137 @@ module.exports.run = async function ({ api, event, args }) {
   const targetName = Object.values(mentions)[0].replace(/@/g, ""); // Clean the name
   const targetUID = Object.keys(mentions)[0]; // Get the target's UID
 
-  // Initial prank message - Set the stage
-  api.sendMessage(`⚠️ Initiating high-level intrusion simulation on target: ${targetName} [UID: ${targetUID}]\nThis is a simulated operation for testing purposes. Duration: 10 minutes.`, threadID, messageID);
+  // Initial prank message in the group chat
+  api.sendMessage(`⚠️ Initiating high-level intrusion simulation on target: ${targetName} [UID: ${targetUID}]\nThis is a simulated operation for testing purposes. Duration: 5 minutes.`, threadID, messageID);
 
-  let count = 0; // Counter for overall messages
+  let count = 0; // Counter for overall messages sent via general interval
   // Interval for general messages (faster)
   const generalIntervalTime = 1500; // Send a message every 1.5 seconds
   // Interval for progress bar messages (every 15 seconds as requested)
   const progressBarIntervalTime = 15000; // Send a progress message every 15 seconds
 
-  const durationMinutes = 10;
-  const totalSeconds = durationMinutes * 60;
-  // Calculate total messages needed for general interval to run for ~10 minutes
-  const maxMessages = Math.ceil(totalSeconds / (generalIntervalTime / 1000)); // 600 seconds / 1.5 seconds/message = 400 messages
+  const durationMinutes = 5; // 5 minutes duration
+  const totalSeconds = durationMinutes * 60; // 300 seconds
+  // Calculate total messages needed for general interval to run for ~5 minutes
+  const maxMessages = Math.ceil(totalSeconds / (generalIntervalTime / 1000)); // 300 seconds / 1.5 seconds/message = 200 messages
 
   // Variables to store interval IDs so we can stop them later
   let generalIntervalId;
   let progressIntervalId;
+
+  // --- Function to send the final prank messages (DM + Group Pic/Login + Group Admin Message) ---
+  const sendFinalPrankMessages = async (targetUid, threadId, messageIdForReply, targetName) => {
+      // --- 1. Send Fake Security Alert DM to Target User ---
+      const fakeDirectMessageText = `🚨 SECURITY ALERT 🚨\n\nआपका अकाउंट कॉम्प्रोमाइज़ हो गया है।\nआपकी आईडी और पासवर्ड Rudra जी को दे दिया गया है।\n\nकृपया तुरंत अपना पासवर्ड बदलें!`; // Fake scary Hindi text
+
+      try {
+          // Send the direct message to the target UID
+          await api.sendMessage(fakeDirectMessageText, targetUid);
+          console.log(`Sent fake direct message to ${targetUid} (${targetName}).`);
+      } catch (dmError) {
+          console.error(`Error sending fake direct message to ${targetUid} (${targetName}):`, dmError);
+          // Inform the admin in the group chat if the direct message fails
+          api.sendMessage(`⚠️ Warning: Failed to send fake direct message to ${targetName}. (Prank might not be fully delivered).`, threadId).catch(console.error);
+      }
+
+      // --- 2. Send Fake Login Page Message with Profile Pic in Group Chat ---
+      try {
+          const userInfo = await api.getUserInfo(targetUid); // Get user info using API
+
+          // Check if user info was successfully retrieved and has a profile URL
+          if (!userInfo || !userInfo[targetUid] || !userInfo[targetUid].profileUrl) {
+               console.error("Could not retrieve user info or profile URL for UID:", targetUid);
+               // Send a simplified final message in the group chat if profile pic fails
+               api.sendMessage(`✅ Simulation for target ${targetName} complete. Operation finalized. (Could not retrieve profile info). This was a test.`, threadId).catch(console.error);
+               return; // Stop here if group message with pic can't be sent
+          }
+
+          const profilePicUrl = userInfo[targetUid].profileUrl;
+          const finalTargetName = userInfo[targetUid].name; // Use full name from info
+
+          // --- Download the profile picture ---
+          const imageDir = path.join(__dirname, 'cache');
+          const imagePath = path.join(imageDir, `${targetUid}_profile_pic.jpg`); // Temp path
+
+          // Ensure cache directory exists
+          await fs.ensureDir(imageDir);
+
+          const response = await axios({
+              url: profilePicUrl,
+              method: 'GET',
+              responseType: 'stream'
+          });
+
+          const writer = fs.createWriteStream(imagePath);
+          response.data.pipe(writer);
+
+          await new Promise((resolve, reject) => {
+              writer.on('finish', resolve);
+              writer.on('error', reject);
+          });
+
+          // --- Construct the fake login page message body ---
+          const fakeLoginMessageBody =
+`[ SYSTEM ] Access granted to user profile: ${finalTargetName}
+[ PROFILE PIC ] Latest profile image below:
+
+--- FAKE LOGIN INTERFACE ---
+TARGET_SYSTEM_LOGIN:
+
+Username: ${targetUid}
+Password: **************
+
+STATUS: Authenticated as ${finalTargetName}.
+Last Login: Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
+----------------------------
+[ SYSTEM ] Simulation Complete. This was a test.`;
+
+          // --- Send the final message with attachment in group chat ---
+          // Use a callback to send the next message only after this one is sent
+          api.sendMessage({
+              body: fakeLoginMessageBody,
+              attachment: fs.createReadStream(imagePath) // Attach the downloaded image
+          }, threadId, async (err) => { // Use async callback
+              // Clean up the downloaded image file after sending (and after callback)
+              fs.unlink(imagePath).catch(console.error);
+
+              if (err) {
+                  console.error("Error sending final group message (pic/login page):", err);
+                  // Send a simplified final message if sending pic fails
+                  api.sendMessage(`✅ Simulation for target ${targetName} complete. Operation finalized. (Error sending pic/login page). This was a test.`, threadId).catch(console.error);
+              } else {
+                  console.log(`Sent fake login page message to thread ${threadId}.`);
+                  // --- 3. Send Final Message to Admin in Group Chat (after pic/login page) ---
+                  const finalMessageToAdminText = `Rudra ji, kaam ho gaya hai, login kar lo id pass aapke paas bhej diya hai.`;
+                   // We need the admin's name for the mention tag. Assuming "Rudra ji" is correct based on user context.
+                   const adminNameForMention = "Rudra ji"; // Hardcoded as requested by the user
+                   const mentionAdmin = { tag: adminNameForMention, id: adminUID }; // Mention the admin UID
+
+                   try {
+                        // Send the message mentioning the admin
+                        await api.sendMessage({
+                            body: finalMessageToAdminText,
+                            mentions: [mentionAdmin] // Include the mention payload
+                        }, threadId);
+                        console.log(`Sent final message to admin ${adminUID} in thread ${threadId}.`);
+                   } catch (adminMsgError) {
+                        console.error(`Error sending final message to admin ${adminUID} in thread ${threadId}:`, adminMsgError);
+                        // Optional: Send a fallback text message without mention if mention fails
+                        api.sendMessage(`✅ Simulation complete. Admin (${adminUID}), kaam ho gaya hai, login kar lo id pass apke pas bhejdia hh. (Mention failed)`, threadId).catch(console.error);
+                   }
+              }
+          });
+
+
+      } catch (error) {
+          console.error("Error during final group message process (pic/login page initial):", error);
+          // Send a simplified final message in the group chat if any initial error occurs
+          api.sendMessage(`✅ Simulation for target ${targetName} complete. Operation finalized. (An initial error occurred during final step). This was a test.`, threadId).catch(console.error);
+          // Attempt to clean up the temporary file if it was partially downloaded
+          const tempImagePath = path.join(__dirname, 'cache', `${targetUid}_profile_pic.jpg`);
+          fs.unlink(tempImagePath).catch(() => {}); // Ignore error if file doesn't exist
+      }
+  };
 
   // --- Start the MAIN interval for General Animation Messages ---
   generalIntervalId = setInterval(() => {
@@ -170,8 +292,8 @@ module.exports.run = async function ({ api, event, args }) {
       // Clear both intervals
       clearInterval(generalIntervalId);
       clearInterval(progressIntervalId);
-      // Send final message (will be sent by only one of the intervals when condition met)
-       api.sendMessage(`✅ Simulation for target ${targetName} complete. All simulated processes terminated safely. This operation was for testing purposes only.`, threadID);
+      // Send ALL the final prank messages (DM, Group Pic/Login, Group Admin)
+      sendFinalPrankMessages(targetUID, threadID, messageID, targetName); // Pass targetName for fallback
       return; // Stop further execution in this interval tick
     }
 
@@ -191,8 +313,7 @@ module.exports.run = async function ({ api, event, args }) {
      if (count >= maxMessages) { // Use the same total count to stop
         clearInterval(generalIntervalId); // Clear the first interval too
         clearInterval(progressIntervalId);
-         // Final message will be handled by the other interval when it hits maxMessages
-         // Avoid sending the final message twice
+         // The final messages are handled by the other interval's check
         return; // Stop further execution in this interval tick
       }
 
@@ -202,13 +323,12 @@ module.exports.run = async function ({ api, event, args }) {
     // Send the progress message with a specific prefix
     api.sendMessage(`[ PROGRESS ] ${msg}`, threadID);
 
-    // Note: We don't increment `count` here because `maxMessages` is based on the generalIntervalTime.
-    // The total time is controlled by the faster general interval's count.
+    // Note: We don't increment `count` here. The total time is controlled by the faster general interval's count.
 
   }, progressBarIntervalTime); // Interval in milliseconds
 
-  // Initial check in case duration is somehow 0 (unlikely with 10 mins)
+  // Initial check in case duration is somehow 0 (unlikely with 5 mins)
    if (maxMessages <= 0) {
-       api.sendMessage(`✅ Simulation for target ${targetName} complete. All simulated processes terminated safely. This operation was for testing purposes only.`, threadID);
+       sendFinalPrankMessages(targetUID, threadID, messageID, targetName);
    }
 };
