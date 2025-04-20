@@ -3,16 +3,18 @@ module.exports.config = {
 	name: "statuspro",
     version: "1.0.1",
 	hasPermssion: 0,
-	credits: "VanHung - Fixed by Arun", 
-	description: "hihihihi",
+	credits: "VanHung - Fixed by Arun", // Credits जैसा था वैसा ही है
+	description: "Sabar karo mera net slow hai status load horha hai...", // Description थोड़ा स्पष्ट किया
 	commandCategory: "no prefix",
-	usages: "bot ki id ko mention kro ya uska naam lo",
-    cooldowns: 5, 
+	usages: "+status", // Usage भी अपडेट किया
+    cooldowns: 5,
 };
 
 module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
 	var { threadID, messageID } = event;
-	if (event.body.indexOf("+status")==0 || event.body.indexOf(`${prefix}status`)==0 || event.body.indexOf("+status")==0 || event.body.indexOf("+Status")==0) {
+
+	// फिक्स की हुई कंडीशन: चेक करो क्या मैसेज '+status' से शुरू होता है (case-insensitive)
+	if (event.body && event.body.toLowerCase().startsWith("+status")) {
 		var msg = {
 				body: "Sabar karo mera net slow hai status load horha hai...⌛",
 			}
@@ -21,5 +23,5 @@ module.exports.handleEvent = function({ api, event, client, __GLOBAL }) {
 		}
 	}
 	module.exports.run = function({ api, event, client, __GLOBAL }) {
-
+    // run function खाली ही रहेगी क्योंकि यह event handler है
   }
