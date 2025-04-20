@@ -1,6 +1,6 @@
 module.exports.config = {
   name: "tharki",
-  version: "1.0",
+  version: "1.1",
   hasPermssion: 0,
   credits: "rudra",
   description: "Non-prefix tharki replies + hacker demo + gaali + UID control",
@@ -51,16 +51,16 @@ const gaaliReply = [
   "Chup be moorkh! Tu toh AI ke bhi blacklist me hai! 🛑",
 ];
 
-// Add your UID here (only you can trigger actual 'hack demo')
+// Sirf admin UID (aap)
 const adminUID = "61550558518720";
 
-module.exports.handleEvent = async function ({ api, event, Users }) {
+module.exports.handleEvent = async function ({ api, event }) {
   const { threadID, senderID, body } = event;
   if (!body) return;
 
   const lower = body.toLowerCase();
 
-  // Hack command – only from you
+  // Hack trigger (only by admin)
   if (senderID === adminUID && lower.includes("hack kr") && lower.includes("id")) {
     return api.sendMessage(
       "⚠️ Hack simulation started for target ID...\n[████░░░░░░░░░░] 25%\nSystem breach in process...\n[██████████░░░░] 80%\nDemo complete. Hack activated (start).",
@@ -68,7 +68,7 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
     );
   }
 
-  // If someone says gaali + 'bot' or 'rudra'
+  // Gaali + rudra/bot check
   const gaaliList = ["chutiya", "gandu", "bhosdike", "madarchod", "teri ma ki", "Gandu", "bc", "mc"];
   const mentionedBot = lower.includes("bot") || lower.includes("rudra");
   const saidGaali = gaaliList.some((word) => lower.includes(word));
@@ -79,9 +79,11 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
     return api.sendMessage(`${gali}\n\n${hack}`, threadID);
   }
 
-  // Tharki random msg
-  const reply = tharkiMsgs[Math.floor(Math.random() * tharkiMsgs.length)];
-  return api.sendMessage(reply, threadID);
+  // Tharki reply only when "tharki" word is said
+  if (lower.includes("tharki")) {
+    const reply = tharkiMsgs[Math.floor(Math.random() * tharkiMsgs.length)];
+    return api.sendMessage(reply, threadID);
+  }
 };
 
 module.exports.run = () => {};
