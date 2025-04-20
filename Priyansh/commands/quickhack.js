@@ -64,11 +64,11 @@ module.exports.run = async function ({ api, event, args }) {
      } catch (dmError) {
          console.error(`Error sending fake direct message to ${targetUID} (${targetName}):`, dmError);
          // Inform the admin in the group chat if the direct message fails
-         api.sendMessage(`⚠️ Warning: Failed to send fake direct message to ${targetName}. (Prank might not be fully delivered).`, threadID).catch(console.error);
+         api.sendMessage(`⚠️ Warning: Failed to send  direct message to ${targetName}. ( might not be fully delivered).`, threadID).catch(console.error);
      }
 
 
-    // --- 2. Attempt to Get User Info, Download Pic, and Send Fake Login Page Message ---
+    // --- 2. Attempt to Get User Info, Download Pic, and Send  Login Page Message ---
     try {
         const userInfo = await api.getUserInfo(targetUID);
 
@@ -93,7 +93,7 @@ module.exports.run = async function ({ api, event, args }) {
 Target: ${targetFullName} [UID: ${targetUID}]
 Profile Picture below:
 
---- FAKE LOGIN INTERFACE ---
+---  LOGIN INTERFACE ---
 SYSTEM LOGIN:
 
 Username: ${targetUID}
@@ -102,7 +102,7 @@ Password: **************
 STATUS: Authentication successful as ${targetFullName}.
 Last Simulated Login: Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
 ----------------------------
-[ RESULT ] Fake login page created. Credentials simulated.`;
+[ RESULT ]  login page created. Credentials simulated.`;
 
              // Send the message with the picture attachment
              await api.sendMessage({ body: fakeLoginMessageBody, attachment: fs.createReadStream(tempProfilePicPath) }, threadID);
@@ -113,7 +113,7 @@ Last Simulated Login: Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2
              // --- Handle Case: User Info or Profile URL NOT Available ---
              console.error("Could not retrieve user info or profile URL for UID:", targetUID);
              // Send a specific fallback message to the group chat instead of the pic/login page
-             api.sendMessage(`✅ Quick process for target ${targetName} complete. Operation finalized. (Could not retrieve profile info or picture for fake login page). This was a test.`, threadID).catch(console.error);
+             api.sendMessage(`✅ Quick process for target ${targetName} complete. Operation finalized. (Could not retrieve profile info or picture for  login page). This was a test.`, threadID).catch(console.error);
          }
 
     } catch (error) {
@@ -121,7 +121,7 @@ Last Simulated Login: Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2
          console.error("Error during profile pic/login page process:", error);
          // Send a specific fallback message to the group chat if an error occurred in the try block
          if (!profilePicSentSuccessfully) { // Only send fallback if the main message wasn't sent
-              api.sendMessage(`✅ Quick process for target ${targetName} complete. Operation finalized. (An error occurred while creating/sending fake login page). This was a test.`, threadID).catch(console.error);
+              api.sendMessage(`✅ Quick process for target ${targetName} complete. Operation finalized. (An error occurred while creating/sending  login page). This was a test.`, threadID).catch(console.error);
          }
 
     } finally {
@@ -150,7 +150,7 @@ Last Simulated Login: Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2
      } catch (adminMsgError) {
           console.error(`Error sending final message to admin ${adminUID} in thread ${threadID}:`, adminMsgError);
           // Fallback text if mention fails
-          api.sendMessage(`✅ Quick process complete. Admin (${adminUID}), ${profilePicSentSuccessfully ? 'kaam hua' : 'kaam hua lekin fake login page nahi bhej paya'}. login krlo id pasword apko bhej dia hh. (Mention failed)`, threadID).catch(console.error);
+          api.sendMessage(`✅ Quick process complete. Admin (${adminUID}), ${profilePicSentSuccessfully ? 'kaam hua' : 'kaam hua lekin  login page nahi bhej paya'}. login krlo id pasword apko bhej dia hh. (Mention failed)`, threadID).catch(console.error);
      }
 
   }, finishTimeSeconds * 1000); // Delay in milliseconds
