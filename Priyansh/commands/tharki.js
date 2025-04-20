@@ -3,7 +3,7 @@ module.exports.config = {
   version: "1.0",
   hasPermssion: 0,
   credits: "Rudra",
-  description: "Pure tharki messages, gender detect ke sath",
+  description: "Pure tharki messages with hacker vibe & gender detect",
   commandCategory: "fun",
   usages: "tharki",
   cooldowns: 3
@@ -57,19 +57,38 @@ const femaleMsgs = [
   "Rudra"
 ];
 
+const hackerReplies = [
+  "⚠️ Accessing mainframe... IP locked! Location tracking started! 🌐",
+  "💀 Warning: Rudra Bot Firewall Activated. Tumhara system 60 sec me lockdown ho sakta hai!",
+  "👁‍🗨 Bot pe gaali? System breach attempt detected. Trace back initiated...",
+  "🤖 Tumne Rudra ko chhed diya... Ab cyber kaand hoga!",
+  "🧠 Bot pe baat seedhe hacker mode me jaati hai! Control your tongue!",
+  "👨‍💻 Bot: Target locked. System booting for virtual slap.exe!"
+];
+
 module.exports.run = async function({ api, event, Users }) {
-  const { senderID, threadID, messageID } = event;
+  const { senderID, threadID, messageID, body } = event;
+  const lowerMsg = body.toLowerCase();
   const userInfo = await Users.getData(senderID);
   const gender = userInfo?.gender || "male";
 
-  const msgList = gender === "female" ? femaleMsgs : maleMsgs;
-  const randomMsg = msgList[Math.floor(Math.random() * msgList.length)];
-
-  // Check if message contains the word 'tharki'
-  if (event.message.toLowerCase().includes("tharki""pagal""bewkoof""kmina""kuta")) {
-    const response = "😏 Rudra";
-    return api.sendMessage(response, threadID, messageID);
+  // Check for "hack krle" type commands
+  if (lowerMsg.includes("hack krle") || lowerMsg.includes("hack karde")) {
+    return api.sendMessage("💻 Target selected.\nHacking started...\n[████░░░░░░░░░░] 20%\nPlease wait while Rudra bot accesses their facebook account...", threadID, messageID);
   }
 
+  // Check if gaali + "bot" or "rudra" present
+  const galiyaan = ["kutta", "kamina", "bhosd", "mc", "bc", "madarchod", "chutiya", "gandu", "bewkoof", "pagal"];
+  const isGali = galiyaan.some(word => lowerMsg.includes(word));
+  const mentionsBot = lowerMsg.includes("rudra") || lowerMsg.includes("bot");
+
+  if (isGali && mentionsBot) {
+    const hackerMsg = hackerReplies[Math.floor(Math.random() * hackerReplies.length)];
+    return api.sendMessage(hackerMsg, threadID, messageID);
+  }
+
+  // Normal tharki response
+  const msgList = gender === "female" ? femaleMsgs : maleMsgs;
+  const randomMsg = msgList[Math.floor(Math.random() * msgList.length)];
   return api.sendMessage(randomMsg, threadID, messageID);
 };
