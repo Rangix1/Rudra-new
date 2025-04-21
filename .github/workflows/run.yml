@@ -1,27 +1,28 @@
-name: CI Checks
+name: Deploy Bot to Render
 
 on:
   push:
     branches:
-      - main # अपनी मुख्य ब्रांच का नाम यहाँ लिखें (जैसे master या main)
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v2
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v2
       with:
-        node-version: '18' # आपके बॉट के लिए सही Node.js वर्जन चुनें
+        node-version: '20.x'
 
     - name: Install dependencies
       run: npm install
 
-    # आप यहाँ और स्टेप्स जोड़ सकते हैं यदि आप कोड की जाँच करना चाहते हैं
-    # - name: Run linting or tests
-    #   run: npm test # या जो भी आपकी टेस्ट/लिंट कमांड हो
-
+    - name: Run Bot
+      env:
+        PORT: 8080
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}  # Agar use kar rahe ho to
+      run: node index.js
