@@ -1,4 +1,5 @@
-Name: Node.js CI
+name: My CI Workflow
+
 
 on:
   push:
