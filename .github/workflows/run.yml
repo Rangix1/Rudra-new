@@ -1,4 +1,4 @@
-name: Node.js CI
+Name: Node.js CI
 
 on:
   push:
@@ -33,4 +33,6 @@ jobs:
     - name: Start the bot
       env:
         PORT: 8080
+        # Google API Key Secret को Environment Variable के रूप में पास करें
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       run: npm start
