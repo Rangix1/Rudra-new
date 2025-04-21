@@ -1,28 +1,36 @@
-name: Deploy Bot to Render
+name: Node.js CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
+    strategy:
+      matrix:
+        node-version: [20.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-    - name: Set up Node.js
+    steps:
+    # Step to check out the repository code
+    - uses: actions/checkout@v2
+
+    # Step to set up the specified Node.js version
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v2
       with:
-        node-version: '20.x'
+        node-version: ${{ matrix.node-version }}
 
+    # Step to install dependencies
     - name: Install dependencies
       run: npm install
 
-    - name: Run Bot
+    # Step to run the bot with the correct port
+    - name: Start the bot
       env:
         PORT: 8080
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}  # Agar use kar rahe ho to
-      run: node index.js
+      run: npm start
