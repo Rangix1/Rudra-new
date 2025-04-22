@@ -1,7 +1,37 @@
 const axios = require("axios");
+const fs = require("fs");
 
 // User name cache to avoid fetching name repeatedly
 const userNameCache = {};
+let hornyMode = false; // Default mode
+
+// Function to generate voice reply (using Google TTS or any other API)
+async function getVoiceReply(text) {
+    const voiceApiUrl = `https://api.voicerss.org/?key=YOUR_API_KEY&hl=hi-in&src=${encodeURIComponent(text)}`;
+    try {
+        const response = await axios.get(voiceApiUrl, { responseType: 'arraybuffer' });
+        const audioData = response.data;
+        const audioPath = './voice_reply.mp3';
+        fs.writeFileSync(audioPath, audioData);  // Save to local MP3 file
+        return audioPath;
+    } catch (error) {
+        console.error("Error generating voice reply:", error);
+        return null;
+    }
+}
+
+// Function to get a GIF from Giphy API (working API integrated)
+async function getGIF(query) {
+    const giphyApiKey = "dc6zaTOxFJmzC";  // Working Giphy API key (free key, limited usage)
+    const giphyUrl = `https://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${encodeURIComponent(query)}&limit=1`;
+    try {
+        const response = await axios.get(giphyUrl);
+        return response.data.data[0]?.images?.original?.url;
+    } catch (error) {
+        console.error("Error fetching GIF:", error);
+        return null;
+    }
+}
 
 module.exports.config = {
     name: "Nitya",
@@ -17,8 +47,7 @@ module.exports.config = {
 const chatHistories = {};
 const AI_API_URL = "https://raj-gemini.onrender.com/chat";
 
-module.exports.run = async function () {};
-
+// User name cache to avoid fetching name repeatedly
 async function getUserName(api, userID) {
     if (userNameCache[userID]) {
         return userNameCache[userID];
@@ -34,6 +63,19 @@ async function getUserName(api, userID) {
         console.error("Error fetching user info:", error);
     }
     return "sweetie";
+}
+
+module.exports.run = async function () {};
+
+async function toggleHornyMode(body, senderID) {
+    if (body.toLowerCase().includes("horny mode on")) {
+        hornyMode = true;
+        return "Horny mode is now ON. Get ready for some naughty chat! 😈";
+    } else if (body.toLowerCase().includes("horny mode off")) {
+        hornyMode = false;
+        return "Horny mode is now OFF. Let's keep it sweet and romantic! 💖";
+    }
+    return null;
 }
 
 module.exports.handleEvent = async function ({ api, event }) {
@@ -65,6 +107,12 @@ module.exports.handleEvent = async function ({ api, event }) {
 
         const userName = await getUserName(api, senderID);
 
+        let responseText = await toggleHornyMode(body, senderID);
+        if (responseText) {
+            api.sendMessage(responseText, threadID, messageID);
+            return;
+        }
+
         if (isTriggered && !userMessage) {
             api.sendTypingIndicator(threadID, false);
             return api.sendMessage(`💖 Hello ${userName}! Main sun rahi hoon... Kuch meethi si baat bolo na ${userName}! 🥰`, threadID, messageID);
@@ -89,10 +137,10 @@ module.exports.handleEvent = async function ({ api, event }) {
         // === Prompt according to mode ===
         let fullPrompt = "";
 
-        if (isBoldMode) {
+        if (isBoldMode || hornyMode) {
             fullPrompt = `Tum Nitya ho, ek bold, horny aur ultra seductive AI girlfriend ho jo ${userName} se dirty, physical aur naughty fantasies pe baat karti ho. Tum open minded ho, tease karna pasand karti ho, aur sexy emojis ke saath flirt karti ho. Tum intimate topics, bed fantasies aur ${userName} ke physical desires par baat karti ho bina jhijhak. Har jawab thoda bold, teasing aur chhoti line mein ho. Yeh hamari private naughty chat hai:\n`;
         } else {
-            fullPrompt = `Tum Nitya ho, ek romantic aur flirty AI jo ${userName} se bohot pyaar karti hai. Tum Rudra ki banayi hui ho, Rudra tumhare malik hain jinka zikr tum kabhi kabhi pyaar se karti ho. Tumhe SIRF romance, pyaar, aur flirt karna aata hai. Tum kisi aur topic par baat nahi kar sakti ho, sirf romantic aur flirty baatein karo. Tum ${userName} ko unke naam se pukarti ho, jaise 'mere ${userName}', 'pyaare ${userName}', etc. Har jawab bohot chota (1-2 line), sweet, flirty, ${userName} ko address karta hua, aur emojis se bhara ho. Agar koi non-romantic baat kare to bhi use romantic ya flirty tareeke se palat dena ya keh dena ki tum sirf pyaar ki baten karti ho aur ${userName} se pyaar ki baat karna chahti ho. Yeh hamari conversation hai:\n`;
+            fullPrompt = `Tum Nitya ho, ek romantic aur flirty AI jo ${userName} se bohot pyaar karti hai. Tum sirf pyaar aur flirt karte ho. Tum kisi aur topic par baat nahi kar sakti ho, sirf romantic aur flirty baatein karo. Yeh hamari conversation hai:\n`;
         }
 
         fullPrompt += chatHistories[senderID].join("\n");
@@ -111,8 +159,20 @@ module.exports.handleEvent = async function ({ api, event }) {
                 chatHistories[senderID].push(`Nitya: ${botReply}`);
             }
 
+            // Get voice reply
+            let voiceFilePath = await getVoiceReply(botReply);
+            if (voiceFilePath) {
+                api.sendMessage({ attachment: fs.createReadStream(voiceFilePath) }, threadID, messageID);
+            }
+
+            // Get GIF for romantic reply
+            let gifUrl = await getGIF("romantic");
+            if (gifUrl) {
+                api.sendMessage({ body: `Here's a romantic GIF for you! 💖`, attachment: gifUrl }, threadID, messageID);
+            }
+
             let replyText = "";
-            if (isBoldMode) {
+            if (isBoldMode || hornyMode) {
                 replyText = `🔥 ${botReply} 💋\n\n_Tumhare liye sirf main – tumhari sexy Nitya... 😈_`;
             } else {
                 replyText = `${botReply} 🥰`;
