@@ -1,17 +1,15 @@
 Module.exports.config = {
     name: "mention",
-    version: "1.3.0", // Version updated
-    hasPermission: 2, // Config mein 2 rehne dete hain, yeh framework ke liye hai
-    credits: "Rudra + Lazer DJ Meham + Google Gemini",
-    description: "Track a user and automatically gali them when they message.",
-    commandCategory: "group",
-    usages: "mention start | mention stop | mention @user",
+    version: "1.0.1", // Chhota version update
+    hasPermission: 2, // hasPermssion ki spelling theek ki
+    credits: "Rudra + Lazer DJ Meham + Google Gemini", // Galiyan ke credits add kiye
+    description: "Track a user and automatically gali them when they message.", // Description update ki
+    // Usages wahi rakhe jo tumhare purane code mein the
+    usages: "mention @user | stopmention | startmention",
     cooldowns: 5
 };
 
-let mentionStatus = false;
-let mentionedUsers = new Set();
-
+// Galiyan ki list (naye code se copy ki hui)
 const galiyan = [
    `Teri maa ki chut mein ganna ghusa ke juice nikal dun, kutte ke pille tere jaise pe to thook bhi na phekhu main, aukat dekh ke muh khol haramkhor!`,
    `Bhosdike, tere jaise chhoti soch wale chhapriyo ka toh main churan banake nasha kar jaun, maa chod pagal aadmi!`,
@@ -24,7 +22,7 @@ const galiyan = [
    `Tujhpe toh jis din bhagwan ka prakop aaya na, saala gaand se dhua nikal jaega, fir bhi tu sudhrega nahi be nalayak!`,
    `Abe teri maa ki aankh, tujhme toh gaand bhi nahi hai chaatne layak, aur attitude aisa jaise Elon Musk ka driver ho!`,
    `Oye bhadwe, teri maa ka bhosda aur baap ki gaand mein dhol bajaun, itna chutiya hai tu ki jaise haryana ke sabse bade bewakoof ka prototype ho.`,
-   `Tere jaise nalayak ko dekh ke bhagwan bhi sochta hoga ki kyu banaya is haramkhor ko, kutti ke pyar se paida hua hai tu, chappal se pitega!`,
+   `Tere jaise nalayak ko dekh ke bhagwan bhi sochta होगा ki kyu banaya is haramkhor ko, kutti ke pyar se paida hua hai tu, chappal se pitega!`,
    `Gaand mein mirchi bhar ke chakki chalau tera, teri maa chillaegi – maaro mujhe maaro – aur tu side me selfie le raha hoga behanchod!`,
    `Tere ghar mein shadi hui thi ya buffalo fight thi? Aisi shakal hai teri jaise 3rd hand condom ka side effect ho.`,
    `Tere baap ki moochh pakad ke kheenchu itna ki usse kite udaun, aur tujhe tere nange bhitar ghusa ke global warming ka reason bana du.`,
@@ -37,108 +35,85 @@ const galiyan = [
    `Abe behanchod, tujhe dekhta hoon toh lagta hai jaise kisi ne chawal se laptop banane ki koshish ki ho – bekaar, slow, aur useless.`
 ];
 
-module.exports.run = async function({ api, event, permission, args }) {
-   const { threadID, senderID, mentions } = event;
 
-   // Hardcoded Admin ID - Apni User ID Yahan Confirm Karlo Agar Yehi Hai
-   const allowedAdminID = "6150558518720"; // <--- Tumhari User ID
+let mentionStatus = true; // Jaise tumhare purane code mein tha, shuru mein true
+let mentionedUsers = new Set(); // List ke liye Set
 
-   // Check permission level (agar framework de raha hai) YA hardcoded ID check karo
-   // Agar permission 2 se kam hai AUR command dene wala hardcoded ID wala user nahi hai, tab permission deny hogi
-   if (permission < 2 && senderID !== allowedAdminID) {
-      return api.sendMessage("Sirf is module ka khaas admin hi yeh command chala sakta hai.", threadID, event.messageID);
-   }
-    // Agar permission >= 2 hai, ya senderID hardcoded ID se match hota hai, toh code aage badhega
+// Tumhara purana run function - yahi control karega commands aur users ko add karna
+// Yeh message ke pure body ko match karega "stopmention" ya "startmention" se
+module.exports.run = async function({ api, event, Users, permission }) { // Users argument use nahi ho raha
+   const { threadID, senderID, mentions, body } = event;
 
-   const firstArg = args[0]?.toLowerCase(); // Command ke baad pehla word dekhein
-
-   if (firstArg === "start") {
-      if (mentionStatus) {
-         return api.sendMessage("Mention system pehle se hi ON hai.", threadID, event.messageID);
-      }
-      mentionStatus = true;
-      return api.sendMessage("Mention system ON ho gaya hai. Ab mention @user karke logo ko track list me add kar sakte ho.", threadID, event.messageID);
-
-   } else if (firstArg === "stop") {
-      if (!mentionStatus) {
-         return api.sendMessage("Mention system pehle se hi OFF hai.", threadID, event.messageID);
-      }
-      mentionStatus = false;
-      mentionedUsers.clear(); // List bhi clear
-      return api.sendMessage("Mention system OFF ho gaya hai. Tracked users list bhi clear ho gayi hai.", threadID, event.messageID);
-
-   } else { // Agar pehla word "start" ya "stop" nahi hai
-      if (!mentionStatus) {
-           if (mentions && Object.keys(mentions).length > 0) {
-                return api.sendMessage("Mention system abhi OFF hai. Pehle '" + global.config.PREFIX + "mention start' command se ON karo fir add karo.", threadID, event.messageID);
-            }
-      }
-
-      // Yeh part users ko add karne ke liye hai (jab @user mention ho)
-      if (mentions && Object.keys(mentions).length > 0) {
-           const mentionedIDs = Object.keys(mentions);
-           let addedCount = 0;
-           let addedNames = [];
-           let alreadyTrackedNames = [];
-
-           for (const mentionID of mentionedIDs) {
-               if (!mentionedUsers.has(mentionID)) {
-                   mentionedUsers.add(mentionID);
-                   addedCount++;
-                   addedNames.push(mentions[mentionID].replace("@", ""));
-               } else {
-                   alreadyTrackedNames.push(mentions[mentionID].replace("@", ""));
-               }
-           }
-
-           let response = "";
-           if (addedCount > 0) {
-               response += `${addedNames.join(", ")} ka record lag gaya. Ab ye log kuch bolenge toh gali milegi.\n`;
-           }
-            if (alreadyTrackedNames.length > 0) {
-               response += `${alreadyTrackedNames.join(", ")} pehle se hi tracked hain.\n`;
-            }
-
-           if (response === "") {
-               response = "Kuch nahi hua. Shayad koi valid user mention nahi kiya ya bot/admin ko mention kiya?";
-           }
-
-           let messageMentions = mentionedIDs.map(id => ({ id: id, tag: mentions[id].replace("@", "") }));
-
-           return api.sendMessage({ body: response.trim(), mentions: messageMentions }, threadID, event.messageID);
-
-       } else {
-           // Agar pehla word start/stop nahi aur koi mention bhi nahi
-           return api.sendMessage(`Invalid usage. Please use: ${global.config.PREFIX}mention start | ${global.config.PREFIX}mention stop | ${global.config.PREFIX}mention @user`, threadID, event.messageID);
+   // Handle stopmention command (poore body ka exact match)
+   // Sirf admin ke liye allow karein stop/start
+   if (body && body.toLowerCase() === "stopmention") {
+       if (permission !== 2) {
+           return api.sendMessage("Sirf admin hi is command ko chala sakta hai.", threadID, event.messageID);
        }
+       mentionStatus = false; // System OFF
+       mentionedUsers.clear(); // List clear
+       return api.sendMessage("Mention system OFF ho gaya hai.", threadID);
    }
+
+   // Handle startmention command (poore body ka exact match)
+   if (body && body.toLowerCase() === "startmention") {
+        if (permission !== 2) {
+           return api.sendMessage("Sirf admin hi is command ko chala sakta hai.", threadID, event.messageID);
+       }
+       mentionStatus = true; // System ON
+       return api.sendMessage("Mention system ON ho gaya hai.", threadID);
+   }
+
+   // Agar system ON hai aur message mein koi mention hai, toh us user ko track list mein add karein
+   // Yeh har mention wale message par chalega agar system ON hai
+   if (mentionStatus && mentions && Object.keys(mentions).length > 0) {
+      const mentionID = Object.keys(mentions)[0]; // Pehle mention kiye hue user ki ID lein
+      // Tumhare purane code mein yahi logic tha add karne ka
+      const mentionName = mentions[mentionID].replace("@", "");
+      mentionedUsers.add(mentionID); // User ko list mein add karein
+      // Jaise tumhare purane code mein confirmation message tha
+      return api.sendMessage({ body: `${mentionName}, oye.`, mentions: [{ id: mentionID, tag: mentionName }] }, threadID);
+   }
+
+    // Agar message upar ke kisi condition se match nahi kiya, toh yeh run function kuch nahi karega.
+    // Purane code mein invalid usage message nahi tha.
 };
 
-// Yeh function har message par chalta hai
+
+// Naye code se handleEvent function - yahi random gali bhejne ka kaam karega
 module.exports.handleEvent = async function({ api, event }) {
    const { threadID, senderID, body } = event;
 
-   // Bot ke khud ke messages ignore karein
+   // Bot ke messages ignore karein
    if (senderID === api.getCurrentUserID()) return;
 
-   // Command messages ignore karein (optional)
-   if (body && body.toLowerCase().startsWith(global.config.PREFIX + this.config.name)) return;
+   // Optional: Commands ko ignore karein agar woh bhi handleEvent trigger karein
+   // Yeh purane run logic ke saath kam zaruri hai
+   // Agar body "stopmention" ya "startmention" hai toh ignore karein
+   // if (body && ["stopmention", "startmention"].includes(body.toLowerCase())) return;
+   // Agar body prefix aur command name "mention" se shuru hoti hai (standard command) toh ignore karein
+   // if (body && global.config.PREFIX && body.toLowerCase().startsWith(global.config.PREFIX + this.config.name)) return;
 
-   // Check karein ki system ON hai AND message bhejne wala user tracked hai
+
+   // Check karein ki mention system ON hai AND message bhejne wala user tracked hai
    if (mentionStatus && mentionedUsers.has(senderID)) {
+      // Ek random gali select karein
       const gali = galiyan[Math.floor(Math.random() * galiyan.length)];
 
       try {
+         // User ka naam fetch karein mention karne ke liye (naye code se)
          const userInfo = await api.getUserInfo(senderID);
-         const name = userInfo[senderID]?.name || "bhosdike";
+         const name = userInfo[senderID]?.name || "bhosdike"; // Agar naam nahi mila toh fallback
 
+         // Gali bhejein, user ko mention karte hue
          return api.sendMessage({
             body: `${name}, ${gali}`,
             mentions: [{ id: senderID, tag: name }]
          }, threadID);
 
       } catch (err) {
-         console.error("User name fetch failed for gali:", err);
+         console.error("Error fetching user info for gali:", err);
+         // Agar naam fetch nahi hua toh bina mention ke gali bhej dein
          return api.sendMessage(gali, threadID);
       }
    }
