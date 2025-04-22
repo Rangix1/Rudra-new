@@ -1,46 +1,77 @@
 module.exports.config = {
   name: "mention",
   version: "1.0.0",
-  hasPermssion: 2, // Admin permission
-  credits: "rudra",
-  description: "Track a user and automatically mention them when they message.",
+  hasPermssion: 2,
+  credits: "Rudra + Lazer DJ Meham",
+  description: "Track a user and automatically gali them when they message.",
   commandCategory: "group",
   usages: "mention @user | stopmention | startmention",
   cooldowns: 5
 };
 
-let mentionStatus = false; // Default mention status is OFF
+let mentionStatus = false;
 let mentionedUsers = new Set();
 
-module.exports.run = async function({ api, event, Users, permission }) {
+const galiyan = [
+  `Teri maa ki chut mein ganna ghusa ke juice nikal dun, kutte ke pille tere jaise pe to thook bhi na phekhu main, aukat dekh ke muh khol haramkhor!`,
+  `Bhosdike, tere jaise chhoti soch wale chhapriyo ka toh main churan banake nasha kar jaun, maa chod pagal aadmi!`,
+  `Tere baap ka naak kaat diya kal, aur teri maa toh bolti thi beta engineer banega, chutiya nikla!`,
+  `Teri gaand mein rocket daalke chand tak bhej du, vahan jakar aliens ko bhi chutiya bana ke aaega tu.`,
+  `Abe chutmarani ke ladke, tu aaya firse gaand maraane? Tere liye toh gali bhi chhoti padti hai re behanchod!`,
+  `Tere muh mein gobar bhar ke usko milkshake bana ke tujhe piladu, bhonsdi ke tere liye toh Safai Abhiyan chalani padegi.`,
+  `Jab tu paida hua toh doctor ne bola tha, isko zinda chod diya toh samaj barbaad ho jaega, lekin teri maa boli — gaand mara ke paida kiya hai, zinda chhod!`,
+  `Tere jaise chutiye ko toh gaali dena bhi beizzati hai gaali ki, phir bhi sun — teri maa ka bhosda, baap ka lund!`,
+  `Tujhpe toh jis din bhagwan ka prakop aaya na, saala gaand se dhua nikal jaega, fir bhi tu sudhrega nahi be nalayak!`,
+  `Abe teri maa ki aankh, tujhme toh gaand bhi nahi hai chaatne layak, aur attitude aisa jaise Elon Musk ka driver ho!`
+    `Oye bhadwe, teri maa ka bhosda aur baap ki gaand mein dhol bajaun, itna chutiya hai tu ki jaise haryana ke sabse bade bewakoof ka prototype ho.`,
+  `Tere jaise nalayak ko dekh ke bhagwan bhi sochta hoga ki kyu banaya is haramkhor ko, kutti ke pyar se paida hua hai tu, chappal se pitega!`,
+  `Gaand mein mirchi bhar ke chakki chalau tera, teri maa chillaegi – maaro mujhe maaro – aur tu side me selfie le raha hoga behanchod!`,
+  `Tere ghar mein shadi hui thi ya buffalo fight thi? Aisi shakal hai teri jaise 3rd hand condom ka side effect ho.`,
+  `Tere baap ki moochh pakad ke kheenchu itna ki usse kite udaun, aur tujhe tere nange bhitar ghusa ke global warming ka reason bana du.`,
+  `Abe kutte, tujhme toh dimaag itna kam hai ki mobile mein airplane mode on karke sochta hai flight chal rahi hai, chutiya kahin ka!`,
+  `Tere jaise chhapriyo ke liye toh WhatsApp ne "Block" ka option banaya tha, warna sabki gaand phat jaati daily teri bakchodi sun ke.`,
+  `Jab tu paida hua tha tab doctor ne bola tha – abey isko zinda chod diya toh galti ho jaegi, lekin teri maa boli – mujhe aur bhi chutiya chahiye!`,
+  `Abe laude, tujhme toh itni akal bhi nahi ki bhains ke aage been bajaye bina bhi nachna shuru kar de, tera brain toh Gaadi ke silencer me chala gaya.`,
+  `Tu gaaliyon ke layak bhi nahi, tu toh us toilet paper jaisa hai jo har kisi ne liya bhi aur faad bhi diya – fir bhi zinda hai.`,
+  `Tu gaaliyon ke layak bhi nahi, tu toh us toilet paper jaisa hai jo har kisi ne liya bhi aur faad bhi diya – fir bhi zinda hai.`,
+  `Tu gaaliyon ke layak bhi nahi, tu toh us toilet paper jaisa hai jo har kisi ne liya bhi aur faad bhi diya – fir bhi zinda haihai.`,
+  `Jab tu bolta hai na, toh lagta hai kisi ne gaand mein flute daal di ho, itna irritating awaz hai – mute karne ka man karta hai tujhe dekhte hi.`,
+  `Abe behanchod, tujhe dekhta hoon toh lagta hai jaise kisi ne chawal se laptop banane ki koshish ki ho – bekaar, slow, aur useless.`,
+  `Tere muh se toh itni badboo aati hai jaise kisi ne chhati pe gobar rakh ke pizza banaya ho, aur tu topping le raha ho masoom sa muh bana ke.`,
+  `Tu toh itna nalla hai ki agar Olympics me nallapan ka event hota toh gold medal bhi chhod ke bhaag jaata keh ke – iske saath compete nahi karunga.`,
+  `Tere jaise low-quality chutiya har gali me milte hain – difference sirf yeh hai ki unke paas aukaat hoti hai chhupne ki, tu toh live stream pe bhi bhagwan ko gali deta hai.`,
+  `Jab teri maa ne tujhe paida kiya na, tab hospital me fire drill chal rahi thi – isliye tujhe dhoondhne me 3 din lag gaye.`,
+  `Tere ghar me TV dekhne ka remote bhi tujhe nahi milta, kyunki remote bhi tujhe serious nahi leta – gaand ka pressure cooker!`,
+  `Abe itna gandha sochta hai tu ki teri shadow bhi tujhe chhod ke gay club chali gayi, soch ke tujhe kya mila behanchod?`,
+  `Tujhe dekh ke toh Windows bhi crash ho jaata hai – “Error: User too ugly and illiterate to continue” likh ke band ho jata hai.`,
+  `Jab tu selfie leta hai, toh camera khud ud jaata hai keh ke – “ab aur nahi jhelunga” – aur tu kehta hai network issue hai.`,
+];
+
+module.exports.run = async function({ api, event, permission }) {
   const { threadID, senderID, mentions, body } = event;
 
-  // Only allow admin to use start/stop commands
   if (["stopmention", "startmention"].includes(body.toLowerCase()) && permission !== 2) {
     return api.sendMessage("Sirf admin hi is command ko chala sakta hai.", threadID, event.messageID);
   }
 
-  // Handle stopmention command (Turn OFF mention system)
   if (body.toLowerCase() === "stopmention") {
     mentionStatus = false;
-    mentionedUsers.clear(); // Clear the mentioned users list
+    mentionedUsers.clear();
     return api.sendMessage("Mention system OFF ho gaya hai.", threadID);
   }
 
-  // Handle startmention command (Turn ON mention system)
   if (body.toLowerCase() === "startmention") {
     mentionStatus = true;
     return api.sendMessage("Mention system ON ho gaya hai.", threadID);
   }
 
-  // Add new user to track when they mention someone
   if (mentionStatus && mentions && Object.keys(mentions).length > 0) {
     const mentionID = Object.keys(mentions)[0];
-    const mentionName = mentions[mentionID].replace("@", ""); // Get the mention name
-    mentionedUsers.add(mentionID); // Add user to mentioned users set
+    const mentionName = mentions[mentionID].replace("@", "");
+    mentionedUsers.add(mentionID);
 
     return api.sendMessage({
-      body: `${mentionName}, oye!`,
+      body: `${mentionName}, oye! Tera record lag gaya. Ab kuch bola toh gali milegi.`,
       mentions: [{ id: mentionID, tag: mentionName }]
     }, threadID);
   }
@@ -49,119 +80,12 @@ module.exports.run = async function({ api, event, Users, permission }) {
 module.exports.handleEvent = async function({ api, event }) {
   const { threadID, senderID } = event;
 
-  // Automatically mention the user when they are tracked
   if (mentionStatus && mentionedUsers.has(senderID)) {
+    const gali = galiyan[Math.floor(Math.random() * galiyan.length)];
+    const nameTag = `@user`; // Replace @user dynamically if needed
     return api.sendMessage({
-      body: `firse aagaye mAiya chudane Rudra here TERI SEXY BHEN KI CHUT ME ME LODA DAAL KAR RAAT BHAR JOR JOR SE CHODUNGA :P =D TERI BHEN KI TIGHT CHUT KO LAOAK LAPAK KAR SPEED SE CHOD DU =D :P TERI BHN KI CHUT CJOD CHOD KE GULABI SE PAAL KAR DUNGA :P =D TERA BAAP ABHI MERE LODE KO CHAAT CHAAT KAR KHUS HOTA HAI :P =D TERI BHEN KI GAND ME KUTUB MINAAR :P =D TERI BHEN HIJDI WHAT AE RANIDI FAMILY :P =D  SEXY BHEN KI CHUT ME ME LODA DAAL KAR RAAT BHAR JOR JOR SE CHODUNGA :P =D TERI BHEN KI TIGHT CHUT KO LAOAK LAPAK KAR SPEED SE CHOD DU =D :P TAPAK LODE FEEL KR BAAP KO AB sun ra chudi hui randi ke aulad , tera maa randi ko chodte chodte tera bahen aya boli kya chod raha ha ? Ma bol randi chod raha ??aur wo boli randi na chod fresh maal yani mujha chod ?? ......... Tera BAAP GANDU AA GAYA ?? RANDY BAN GAYA .............aur wo boli randi na chod fresh maal yani mujha chod......... Tera BAAP GANDU AA GAYARANDY BAN GAYA .............,@Saghr Saghr bh0s@di ke aisa thappad marunga tere muh ke dant g@1ad se hoker girenge
-.
-2> jija se bkch0di krta hai m@derch0d tamiz sikh l0wd3
-.
-3>g@1nd mei tere sua ghusa ke swetter bna dunga
-.
-4>jh@1nt khayega mera behn ke l0wde
-.
-
-5>teri ammy ka asiq hun wo v khufiya asiq ati hai mujhse chummiya lene apne ch00t pe
-.
-6> teri ammy ke g@1nd ko mukka marke tod dunga m@derch0d baap se bakch0di
-.
-7> bhagg m@derch0d teri ammy toh nukkad ki r@nd1 hai re
-.
-8>300 rs wali r@nd1 ke olad
-.
-9>teri behn k0 utha ke salwar ke sath hi p3lunga
-.
-10>hahahaha g@nd00 tera baal pakad ke diwal se lada lada ke tera seer phod ke teri ammy ka mang bharungaTu Be Tu Metra he KhOon hai na:))Tab he Tu abhi tak baGh Nahi   
-raha hai:-h=)))=))))
-tere  baji ke kus main apna lund shaid main dabo kar metha lund
-maron aur bacha be metha peda hoga=))=))
-chal pehan chood pandga karny aya ha:-jlun per char ka Ponciyan 
-mar bass jira tera kam aa
-Chal Oyee type kar Mehsos na kar Kanjarii diya bachiya:-j:-j:)) 
-
-tere baji ke chut pe bomb maron like sadaam ne kurdon pe chemical
- test kea tha:))=))
-Oyee mera dil karda way terii pehan di kuss uthay char ka dance  
-karan tu mehsos ta karay ga na:))=))
-teri maa v kanjarii si main te insha di hi samjh raha tha:-j>:)
-
-chal pehan chood Gandoo ka putter jasa baapp ha wasey beta
-kanjarii maa diya bachiya:))>:)
-ab masos na kar=)):-j=)))
-
-tere baji ke bund mar ke us ko hamla kar don dunya ke wahid ourat
-jo bund se hamla hoge mehsus nahi fakhar>:)
-mehsus#-o:))
-
-oye pehan choda chal pehan dii kuss pash kar>:/mehsos Na Kar:))=)) 
-
-tere maan ke raana main apna lund maron aur mere ko neend aa jaye
-haha iesa ho sakta ha?>:)
-tere  baji ke kus main apna lund shaid main dabo kar metha lund
-maron aur bacha be metha peda hoga:)):-j
-maanlore mehsus to nahi kar ga  acha ab bool ye coopy pasting ha
- maanchuda type kar>:/=))
-maron tere baji ke un jawani main lund jis se wo pore k mohally 
-ko fudi daty ha:)):))
-chal maanchuda  kad ane baji nu bahar   mera lund zooor
-main betab ha>:)=))
-main apne lun ke hawas trere baji ke kus main de kar thandi kar
-don mehsus[-xnahi karna=))
-tere maan ke mamom  se dhood nakal ke pore room ko dhood 
-pati pela doon :Omehsus=))=))
-masoos[-x  
-
-chal oii apne phn de kus zoor se mere lund pe mar aur khus ho
-ja tere baji mere se chuda rahe ha:))
-Oye Pehan Choda Mera dil karda way Terii Pehan Di Kuss Tay Char   
-ka dance karan tu mehsos tay nahi karay ga na:))
-Kar Masoos:))=)))
-
-Mera KhOOn Ko Kar Muajy he galian Day Raha Hai han Tu Haram ka
-hai na Ma Ke Tarf say:))=))
-Ab Kar Masoos:))=))))
-
-Kar Masoos:)) Behan Ke Kuss MarOon Toii Main Dam NaHi 
-Tha PanGa Kuin Kay Tha:))=))
-Main Tumari Niki Behan Ke Kuss Main Lolay ka Lun MarOon Tu Masoso
-Tu Nahi karay ga Na:)):))
-ab Kar Masoso Kisi Gashti kay Bachay:))=))
-
-GHASTOO MAN K BACHOO TUM DONO AGAR APNII BAJII KO ROOM MA LA KAR
-KHARA KAR DOO TOO MEIN NAHI CHODOON GA:))>:)
-KYON K MEIN NA APNA DOST SA WADA KEYA HOWA HAI K MEIN TUMHARII 
-AMA KO JAN KO CHOD KAR AOON GA:))
-MAHSOOOOOOOOOOOOOS[-x:))
-
-ISA PATA CHAL RAHA HAI JAISA YEA APNI GAND K BALL AAG PAR BETH KAR
-JALATA HAIN>:)=))
-merya saluiyyah main teri baji jan nu lun mar mar ky aus d kus  
-bech khudy bana devan:)):))
-aap ki dadi ko kabar se nikaal kar mai kisi khotay ko us pe charha
-doon masoos tou nahi karoo gay>:)
-main teri ami jan ki kus main lun mar ky audi kus ny bazar ich hi  
-phar devakesa lagy ga tujy mehsoos:))
-aap ki baji ki choti c kuss mai mai agar cricket ka world cup karwa
- doon aap masoos tou nahi karoo gay>:)
-aap ki maa k phuday mai agar mai operation silence karwa doon aap
-masoos tou nahi karoo gay:)):))
-teri baji k ab taankay bhi koi nahi lagaye ga:))uski choot mar maar
-kar motor way bana diya hy:))=)))
-mera dil karda way teri baji di kuss uthay Muter kar ka teray kolon
-us di kuss chatwanwan mehsos:)):-j
-mera dil karta hy main teri maa k phuday main ghoos kar 
-teeter ka shikaar kheelaaan>:)
-tere baji ke lipstick kench kar us ke kus pe nashan laga kar us  
-main apna lund maron>:):))
-Oyee pehan choda pehan dii kamii da Net uuse karan waliya type kar 
-pehan da rishta na day>:/:))
-oye maalana kisi dagar dalii maa diya bachiya Mehsos:))=)))
-
-aap ki maa k ghuusay mai agar mai steel mill lagwa doon aap masoos
- tou nahi karoo gay:)):))
-aap ki baji k mamoon ko mai choos choos kar us k mamoon se doodh khatam
-kar doon masoos tou naiTERI SEXY BHEN KI CHUT ME ME LODA DAAL KAR RAAT BHAR JOR JOR SE CHODUNGA :P =D TERI BHEN KI TIGHT CHUT KO LAOAK LAPAK KAR SPEED SE CHOD DU =D :P TERI BHN KI CHUT CJOD CHOD KE GULABI SE PAAL KAR DUNGA :P =D TERA BAAP ABHI MERE LODE KO CHAAT CHAAT KAR KHUS HOTA HAI :P =D TERI BHEN KI GAND ME KUTUB MINAAR :P =D TERI BHEN HIJDI WHAT AE RANIDI FAMILY :P =D  SEXY BHEN KI CHUT ME ME LODA DAAL KAR RAAT BHAR JOR JOR SE CHODUNGA :P =D TERI BHEN KI TIGHT CHUT KO LAOAK LAPAK KAR SPEED SE CHOD DU =D :P TAPAK LODE FEEL KR BAAP KO AB sun ra chudi hui randi ke aulad , tera maa randi ko chodte chodte tera bahen aya boli kya chod raha ha ? Ma bol randi chod raha ??aur wo boli randi na chod @${senderID}!`,
-      mentions: [{ id: senderID, tag: "@" }]
+      body: `${gali}`,
+      mentions: [{ id: senderID, tag: nameTag }]
     }, threadID);
   }
 };
