@@ -22,8 +22,8 @@ const galiyan = [
   `Jab tu paida hua toh doctor ne bola tha, isko zinda chod diya toh samaj barbaad ho jaega, lekin teri maa boli — gaand mara ke paida kiya hai, zinda chhod!`,
   `Tere jaise chutiye ko toh gaali dena bhi beizzati hai gaali ki, phir bhi sun — teri maa ka bhosda, baap ka lund!`,
   `Tujhpe toh jis din bhagwan ka prakop aaya na, saala gaand se dhua nikal jaega, fir bhi tu sudhrega nahi be nalayak!`,
-  `Abe teri maa ki aankh, tujhme toh gaand bhi nahi hai chaatne layak, aur attitude aisa jaise Elon Musk ka driver ho!`
-    `Oye bhadwe, teri maa ka bhosda aur baap ki gaand mein dhol bajaun, itna chutiya hai tu ki jaise haryana ke sabse bade bewakoof ka prototype ho.`,
+  `Abe teri maa ki aankh, tujhme toh gaand bhi nahi hai chaatne layak, aur attitude aisa jaise Elon Musk ka driver ho!`,
+  `Oye bhadwe, teri maa ka bhosda aur baap ki gaand mein dhol bajaun, itna chutiya hai tu ki jaise haryana ke sabse bade bewakoof ka prototype ho.`,
   `Tere jaise nalayak ko dekh ke bhagwan bhi sochta hoga ki kyu banaya is haramkhor ko, kutti ke pyar se paida hua hai tu, chappal se pitega!`,
   `Gaand mein mirchi bhar ke chakki chalau tera, teri maa chillaegi – maaro mujhe maaro – aur tu side me selfie le raha hoga behanchod!`,
   `Tere ghar mein shadi hui thi ya buffalo fight thi? Aisi shakal hai teri jaise 3rd hand condom ka side effect ho.`,
@@ -33,18 +33,8 @@ const galiyan = [
   `Jab tu paida hua tha tab doctor ne bola tha – abey isko zinda chod diya toh galti ho jaegi, lekin teri maa boli – mujhe aur bhi chutiya chahiye!`,
   `Abe laude, tujhme toh itni akal bhi nahi ki bhains ke aage been bajaye bina bhi nachna shuru kar de, tera brain toh Gaadi ke silencer me chala gaya.`,
   `Tu gaaliyon ke layak bhi nahi, tu toh us toilet paper jaisa hai jo har kisi ne liya bhi aur faad bhi diya – fir bhi zinda hai.`,
-  `Tu gaaliyon ke layak bhi nahi, tu toh us toilet paper jaisa hai jo har kisi ne liya bhi aur faad bhi diya – fir bhi zinda hai.`,
-  `Tu gaaliyon ke layak bhi nahi, tu toh us toilet paper jaisa hai jo har kisi ne liya bhi aur faad bhi diya – fir bhi zinda haihai.`,
   `Jab tu bolta hai na, toh lagta hai kisi ne gaand mein flute daal di ho, itna irritating awaz hai – mute karne ka man karta hai tujhe dekhte hi.`,
-  `Abe behanchod, tujhe dekhta hoon toh lagta hai jaise kisi ne chawal se laptop banane ki koshish ki ho – bekaar, slow, aur useless.`,
-  `Tere muh se toh itni badboo aati hai jaise kisi ne chhati pe gobar rakh ke pizza banaya ho, aur tu topping le raha ho masoom sa muh bana ke.`,
-  `Tu toh itna nalla hai ki agar Olympics me nallapan ka event hota toh gold medal bhi chhod ke bhaag jaata keh ke – iske saath compete nahi karunga.`,
-  `Tere jaise low-quality chutiya har gali me milte hain – difference sirf yeh hai ki unke paas aukaat hoti hai chhupne ki, tu toh live stream pe bhi bhagwan ko gali deta hai.`,
-  `Jab teri maa ne tujhe paida kiya na, tab hospital me fire drill chal rahi thi – isliye tujhe dhoondhne me 3 din lag gaye.`,
-  `Tere ghar me TV dekhne ka remote bhi tujhe nahi milta, kyunki remote bhi tujhe serious nahi leta – gaand ka pressure cooker!`,
-  `Abe itna gandha sochta hai tu ki teri shadow bhi tujhe chhod ke gay club chali gayi, soch ke tujhe kya mila behanchod?`,
-  `Tujhe dekh ke toh Windows bhi crash ho jaata hai – “Error: User too ugly and illiterate to continue” likh ke band ho jata hai.`,
-  `Jab tu selfie leta hai, toh camera khud ud jaata hai keh ke – “ab aur nahi jhelunga” – aur tu kehta hai network issue hai.`,
+  `Abe behanchod, tujhe dekhta hoon toh lagta hai jaise kisi ne chawal se laptop banane ki koshish ki ho – bekaar, slow, aur useless.`
 ];
 
 module.exports.run = async function({ api, event, permission }) {
@@ -82,10 +72,18 @@ module.exports.handleEvent = async function({ api, event }) {
 
   if (mentionStatus && mentionedUsers.has(senderID)) {
     const gali = galiyan[Math.floor(Math.random() * galiyan.length)];
-    const nameTag = `@user`; // Replace @user dynamically if needed
-    return api.sendMessage({
-      body: `${gali}`,
-      mentions: [{ id: senderID, tag: nameTag }]
-    }, threadID);
+
+    try {
+      const userInfo = await api.getUserInfo(senderID);
+      const name = userInfo[senderID]?.name || "bhosdike";
+
+      return api.sendMessage({
+        body: `${name}, ${gali}`,
+        mentions: [{ id: senderID, tag: name }]
+      }, threadID);
+    } catch (err) {
+      console.error("User name fetch failed:", err);
+      return api.sendMessage(gali, threadID);
+    }
   }
 };
