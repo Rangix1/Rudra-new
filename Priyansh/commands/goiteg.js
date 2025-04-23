@@ -1,4 +1,4 @@
-// Code implemented as a "No prefix" command triggered by message content in handleEvent
+tri// Code implemented as a "No prefix" command triggered by message content in handleEvent
 
 // Note: This approach bypasses the standard run function and prefix command dispatching.
 // Commands are triggered by phrases in messages within handleEvent.
