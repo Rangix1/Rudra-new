@@ -1,0 +1,15 @@
+Module.exports.config = {
+    name: "hello",
+    version: "1.0.0",
+    hasPermission: 0, // Koi bhi use kar sake
+    credits: "Your Name",
+    description: "Says hello.",
+    commandCategory: "utility",
+    usages: "hello",
+    cooldowns: 5
+};
+
+module.exports.run = async function({ api, event }) {
+    console.log("--- DEBUG --- Hello module run function executed!"); // Debug log
+    return api.sendMessage("Hello!", event.threadID);
+};
