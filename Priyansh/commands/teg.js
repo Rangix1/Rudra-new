@@ -1,16 +1,21 @@
-Module.exports.config = {
-    name: "teg", // *** Command name changed from "mention" to "teg" ***
-    version: "1.6.0", // Version updated
-    hasPermission: 2, // Admin permission required for commands
-    credits: "Rudra + Lazer DJ Meham + Google Gemini", // Credits
-    description: "Track a user and automatically gali them when they message.",
-    commandCategory: "group",
-    // Usages reflecting the new command name "teg"
-    usages: "teg start | teg stop | teg @user",
-    cooldowns: 5
+// Code implemented as a "No prefix" command triggered by message content in handleEvent
+
+// Note: This approach bypasses the standard run function and prefix command dispatching.
+// Commands are triggered by phrases in messages within handleEvent.
+
+Const fs = global.nodemodule["fs-extra"]; // Agar file system functions use hone ho, abhi nahi ho rahe code mein
+module.exports.config = {
+    name: "goiteg", // *** Naya aur alag naam rakha hai conflict se bachne ke liye ***
+    version: "2.0.0", // Major version update
+    hasPermission: 2, // Permissions will be checked internally for actions
+    credits: "Rudra + Lazer DJ Meham + Google Gemini",
+    description: "Track a user and automatically gali them when they message using phrases.",
+    commandCategory: "No prefix", // *** Yeh ab No prefix command hai ***
+    usages: "Type 'goiteg start' or 'goiteg stop' or 'goiteg add @user' in message", // Usages reflect trigger phrases
+    cooldowns: 5 // Cooldown agar zaroorat ho
 };
 
-// Galiyan list (full list jaisi tumne di thi)
+// Galiyan list (full list)
 const galiyan = [
    `Teri maa ki chut mein ganna ghusa ke juice nikal dun, kutte ke pille tere jaise pe to thook bhi na phekhu main, aukat dekh ke muh khol haramkhor!`,
    `Bhosdike, tere jaise chhoti soch wale chhapriyo ka toh main churan banake nasha kar jaun, maa chod pagal aadmi!`,
@@ -40,128 +45,107 @@ const galiyan = [
 let mentionStatus = false; // System ON/OFF status (initial state OFF)
 let mentionedUsers = new Set(); // Tracked users
 
-// run function: Handles commands (now for "+teg")
-module.exports.run = async function({ api, event, permission, args }) {
-   const { threadID, senderID, mentions } = event;
+// run function is NOT used for No prefix commands
+// module.exports.run = function({ api, event, client, __GLOBAL }) {}; // This can be an empty function or removed
 
-   // Hardcoded Admin ID - Apni User ID Yahan Confirm Karlo Agar Yehi Hai
-   const allowedAdminID = "6150558518720"; // <--- Tumhari User ID
 
-   // --- DEBUG LOGS ADDED ---
-   console.log("--- DEBUG RUN START (TEG) --- Command Received.");
-   console.log("--- DEBUG RUN START (TEG) --- Sender ID:", senderID);
-   console.log("--- DEBUG RUN START (TEG) --- Permission Level:", permission);
-   console.log("--- DEBUG RUN START (TEG) --- Allowed Admin ID:", allowedAdminID);
-   console.log("--- DEBUG RUN START (TEG) --- Args:", args);
-   console.log("--- DEBUG RUN START (TEG) --- Mentions:", Object.keys(mentions || {}).length);
-   // -------------------------
-
-   // Check permission OR hardcoded ID
-   if (permission < 2 && senderID !== allowedAdminID) {
-      // --- DEBUG LOG ---
-      console.log("--- DEBUG RUN STOP (TEG) --- Permission DENIED.");
-      // ---------------
-      return api.sendMessage("Sirf is module ka khaas admin hi yeh command chala sakta hai.", threadID, event.messageID);
-   }
-
-   // --- DEBUG LOG ---
-   console.log("--- DEBUG RUN CONTINUE (TEG) --- Permission check PASSED or BYPASSED.");
-   // ---------------
-
-   const subcommand = args[0]?.toLowerCase(); // Command ke baad pehla argument dekhein
-
-   if (subcommand === "start") {
-       // --- DEBUG LOG ---
-       console.log("--- DEBUG RUN BLOCK (TEG) --- Inside 'start' block.");
-       // ---------------
-       if (mentionStatus) {
-           return api.sendMessage("Teg system pehle se hi ON hai.", threadID, event.messageID); // Message updated
-       }
-       mentionStatus = true;
-       return api.sendMessage("Teg system ON ho gaya hai. Ab teg @user karke logo ko track list me add kar sakte ho.", threadID, event.messageID); // Message updated
-
-   } else if (subcommand === "stop") {
-       // --- DEBUG LOG ---
-       console.log("--- DEBUG RUN BLOCK (TEG) --- Inside 'stop' block.");
-       // ---------------
-       if (!mentionStatus) {
-           return api.sendMessage("Teg system pehle se hi OFF hai.", threadID, event.messageID); // Message updated
-       }
-       mentionStatus = false;
-       mentionedUsers.clear(); // Clear list when stopping
-       return api.sendMessage("Teg system OFF ho gaya hai. Tracked users list bhi clear ho gayi hai.", threadID, event.messageID); // Message updated
-
-   } else { // Agar pehla argument "start" ya "stop" nahi hai, toh maanenge user add kar raha hai ya invalid command hai
-       // --- DEBUG LOG ---
-       console.log("--- DEBUG RUN BLOCK (TEG) --- Inside 'else' (add user or invalid command) block.");
-       // ---------------
-       if (!mentionStatus) {
-           // --- DEBUG LOG ---
-           console.log("--- DEBUG RUN BLOCK (TEG) --- System is OFF.");
-           // ---------------
-           if (mentions && Object.keys(mentions).length > 0) { // Agar system OFF hai par mention hai, system ON karne ko kaho
-                return api.sendMessage("Teg system abhi OFF hai. Pehle '" + global.config.PREFIX + "teg start' command se ON karo fir add karo.", threadID, event.messageID); // Message updated
-            }
-            // Agar system OFF hai aur mention bhi nahi, toh invalid usage hai (neeche handle hoga)
-       }
-
-       // User add karne ka logic (jab command ke baad mention ho)
-       if (mentions && Object.keys(mentions).length > 0) {
-           // --- DEBUG LOG ---
-           console.log("--- DEBUG RUN BLOCK (TEG) --- Mentions found, attempting to add users.");
-           // ---------------
-           const mentionedIDs = Object.keys(mentions);
-           let addedCount = 0;
-           let addedNames = [];
-           let alreadyTrackedNames = [];
-
-           for (const mentionID of mentionedIDs) {
-               if (!mentionedUsers.has(mentionID)) {
-                   mentionedUsers.add(mentionID);
-                   addedCount++;
-                   addedNames.push(mentions[mentionID].replace("@", ""));
-               } else {
-                   alreadyTrackedNames.push(mentions[mentionID].replace("@", ""));
-               }
-           }
-
-           let response = "";
-           if (addedCount > 0) {
-               response += `${addedNames.join(", ")} ka record lag gaya. Ab ye log kuch bolenge toh gali milegi.\n`;
-           }
-           if (alreadyTrackedNames.length > 0) {
-               response += `${alreadyTrackedNames.join(", ")} pehle se hi tracked hain.\n`;
-           }
-
-           if (response === "") {
-               response = "Kuch nahi hua. Shayad koi valid user mention nahi kiya ya bot/admin ko mention kiya?";
-           }
-
-           let messageMentions = mentionedIDs.map(id => ({ id: id, tag: mentions[id].replace("@", "") }));
-
-           return api.sendMessage({ body: response.trim(), mentions: messageMentions }, threadID, event.messageID);
-
-       } else {
-           // Na argument start/stop hai, na hi mention -> Invalid usage
-           // --- DEBUG LOG ---
-           console.log("--- DEBUG RUN BLOCK (TEG) --- No valid argument or mentions. Invalid usage.");
-           // ---------------
-           return api.sendMessage(`Invalid usage. Please use: ${global.config.PREFIX}teg start | ${global.config.PREFIX}teg stop | ${global.config.PREFIX}teg @user`, threadID, event.messageID); // Message updated
-       }
-   }
-};
-
-// handleEvent remains the same (reacts with galis) - updated command ignore based on this.config.name
-module.exports.handleEvent = async function({ api, event }) {
-   const { threadID, senderID, body } = event;
+// handleEvent: Ab yeh function commands (phrases) aur reaction dono handle karega
+module.exports.handleEvent = async function({ api, event, permission, args }) { // Added permission & args
+   const { threadID, senderID, body, messageID, mentions } = event;
 
    // Ignore bot messages
    if (senderID === api.getCurrentUserID()) return;
 
-   // Ignore commands for THIS module based on its current name ("teg")
-   if (body && global.config.PREFIX && body.toLowerCase().startsWith(global.config.PREFIX + this.config.name)) return; // this.config.name will now be "teg"
+   // --- Command Phrase Handling ---
+   // Message body ko lowercase mein lein phrases check karne ke liye
+   const lowerBody = body?.toLowerCase();
 
-   // If system ON AND sender is tracked
+   // Hardcoded Admin ID - Apni User ID Yahan Confirm Karlo Agar Yehi Hai
+   const allowedAdminID = "6155055818720"; // <--- Tumhari User ID
+
+   // Admin check: Ya toh standard permission 2+ ho, ya phir hardcoded ID ho
+   const hasAdminPermission = (permission >= 2 || senderID === allowedAdminID);
+
+
+   // "goiteg start" phrase check
+   if (lowerBody?.includes("goiteg start")) {
+       // Admin permission required for this action
+       if (!hasAdminPermission) {
+           return api.sendMessage("Sirf is module ka khaas admin hi yeh command chala sakta hai.", threadID, messageID);
+       }
+       // Logic to start the system
+       if (mentionStatus) {
+           return api.sendMessage("Teg system pehle se hi ON hai.", threadID, messageID);
+       }
+       mentionStatus = true;
+       return api.sendMessage("Teg system ON ho gaya hai. Ab type 'goiteg add @user' to add users.", threadID, messageID); // Usages update kiye
+   }
+
+   // "goiteg stop" phrase check
+   if (lowerBody?.includes("goiteg stop")) {
+       // Admin permission required for this action
+       if (!hasAdminPermission) {
+           return api.sendMessage("Sirf is module ka khaas admin hi yeh command chala sakta hai.", threadID, messageID);
+       }
+       // Logic to stop the system
+       if (!mentionStatus) {
+           return api.sendMessage("Teg system pehle se hi OFF hai.", threadID, messageID);
+       }
+       mentionStatus = false;
+       mentionedUsers.clear(); // Clear list
+       return api.sendMessage("Teg system OFF ho gaya hai. Tracked users list bhi clear ho gayi hai.", threadID, messageID);
+   }
+
+   // "goiteg add" phrase check AND mentions check
+   // Agar message mein "goiteg add" phrase ho AUR mentions bhi hon
+   if (lowerBody?.includes("goiteg add") && mentions && Object.keys(mentions).length > 0) {
+       // Admin permission required for this action
+       if (!hasAdminPermission) {
+           return api.sendMessage("Sirf is module ka khaas admin hi yeh command chala sakta hai.", threadID, messageID);
+       }
+       // Agar system OFF hai, add nahi kar sakte
+       if (!mentionStatus) {
+           return api.sendMessage("Teg system abhi OFF hai. Pehle 'goiteg start' type karke ON karo.", threadID, messageID); // Usages update kiye
+       }
+
+       // Logic to add users based on mentions in the message
+       const mentionedIDs = Object.keys(mentions);
+       let addedCount = 0;
+       let addedNames = [];
+       let alreadyTrackedNames = [];
+
+       for (const mentionID of mentionedIDs) {
+           if (!mentionedUsers.has(mentionID)) {
+               mentionedUsers.add(mentionID);
+               addedCount++;
+               addedNames.push(mentions[mentionID].replace("@", ""));
+           } else {
+               alreadyTrackedNames.push(mentions[mentionID].replace("@", ""));
+           }
+       }
+
+       let response = "";
+       if (addedCount > 0) {
+           response += `${addedNames.join(", ")} ka record lag gaya. Ab ye log kuch bolenge toh gali milegi.\n`;
+       }
+       if (alreadyTrackedNames.length > 0) {
+           response += `${alreadyTrackedNames.join(", ")} pehle se hi tracked hain.\n`;
+       }
+
+       if (response === "") {
+           response = "Kuch nahi hua. Shayad koi valid user mention nahi kiya ya bot/admin ko mention kiya?";
+       }
+
+       let messageMentions = mentionedIDs.map(id => ({ id: id, tag: mentions[id].replace("@", "") }));
+
+       return api.sendMessage({ body: response.trim(), mentions: messageMentions }, threadID, messageID);
+   }
+    // --- End of Command Phrase Handling ---
+
+
+   // --- Reaction Handling ---
+   // Yeh part har message par chalega jo upar ke command phrases se match nahi hua
+   // Check karein ki system ON hai AND message bhejne wala user tracked hai
    if (mentionStatus && mentionedUsers.has(senderID)) {
       const gali = galiyan[Math.floor(Math.random() * galiyan.length)];
       try {
@@ -170,10 +154,14 @@ module.exports.handleEvent = async function({ api, event }) {
          return api.sendMessage({
             body: `${name}, ${gali}`,
             mentions: [{ id: senderID, tag: name }]
-         }, threadID);
+         }, threadID, messageID); // messageID add kiya
       } catch (err) {
          console.error("Error fetching user info for gali:", err);
-         return api.sendMessage(gali, threadID);
+         return api.sendMessage(gali, threadID, messageID); // messageID add kiya
       }
    }
+   // Agar system OFF hai ya user tracked nahi hai, toh handleEvent kuch nahi karega.
 };
+
+// Optional: Empty run function if required by bot structure
+// module.exports.run = function({ api, event, client, __GLOBAL }) {};
