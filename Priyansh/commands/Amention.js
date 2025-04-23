@@ -55,4 +55,4 @@ module.exports.handleEvent = async function({ api, event }) {
       mentions: [{ id: senderID, tag: "@" }]
     }, threadID);
   }
-}; ye hh wo code jo abhi chlra hh
+};
