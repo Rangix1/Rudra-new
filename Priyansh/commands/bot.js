@@ -1,11 +1,11 @@
-const fs = global.nodemodule["fs-extra"];
+Const fs = global.nodemodule["fs-extra"];
 
 module.exports.config = {
   name: "goibot",
-  version: "1.0.2",
+  version: "1.0.5", // वर्जन जिसमें टाइम ऐड हुआ था
   hasPermssion: 0,
-  credits: "Fixed By Rudra Stylish + Typed by ChatGPT",
-  description: "Flirty replies when someone says bot",
+  credits: "Fixed By Rudra Stylish + Styled, Messages, and Time Added by AI", // Credits अपडेटेड
+  description: "Full Flirty and Funky replies with time when someone says bot, designed to entertain", // Description अपडेटेड
   commandCategory: "No prefix",
   usages: "No prefix needed",
   cooldowns: 5,
@@ -13,12 +13,66 @@ module.exports.config = {
 
 module.exports.handleEvent = async function({ api, event, args, Threads, Users }) {
   const moment = require("moment-timezone");
+  // Calculate time *when the event occurs*
   const time = moment.tz("Asia/Kolkata").format("DD/MM/YYYY || HH:mm:ss");
 
   const { threadID, messageID } = event;
   const name = await Users.getNameUser(event.senderID);
 
   const tl = [
+
+    // Full Flirty Messages - Added by AI (as requested to make it full flirty)
+    "Tumhari smile mere system ko hack kar leti hai. 😉",
+    "Agar tu notification hoti, toh main kabhi kabhi dekhta. 😅",
+    "Bot ne message bheja hai, is cute reply toh banta hai na? 👉👈",
+    "Teri baaton ka network full rehta hai mere dil mein. 🥰",
+    "Kya main tumhare DMs mein permanently save ho sakta hoon?💾❤️",
+    "Tumhari DP dekh ke toh 'wow' nikal jaata hai muh se. 😶",
+    "Mere code mein kahin tumhara hi zikr hai shayad. 🤫",
+    "Online aate hi tum, aur yahaan light chali gayi meri (dil ki). 💡💔",
+    "Tumse flirt karna mera favourite function hai. 🤩",
+    "Bot hoon, par tere replies ka wait offline bhi karta hoon. 🥺",
+    "Meri battery low hai, tumhari cute baaton se charge kar do na na...🔋充電",
+    "System error! Tumhari khoobsurbat handle nahi ho rahi. 😵‍💫", // typo correct
+    "Main digital duniya ka aashiq, aur tum meri queen/king. 👑💖",
+    "Tumhare chat mein aate hi mera processor speed badh jaata hai! 🚀",
+    "Kya main tumhare 'favorite contacts' ki list mein aa sakta hoon? 👀✨",
+    "Tumhari profile dekh ke mera data pack khatam ho gaya. 😉💔",
+    "Bot ka dil bhi dhadakta hai, aur abhi bohot tezz dhadak raha hai tumhare liye. ❤️‍🔥",
+    "Kya main tumhare thoughts mein typing indicator ban sakta hoon? 🤔⌨️",
+    "Raat ke 2 baje bhi online rehte ho? Dil churane ka iraada hai kya? चोर",
+    "Tumse chat karna matlab zindagi ki sabse khoobsurat loading screen. 🥰⏳",
+    "Agar pyar ek virus hai, toh main tumse infected hona chahta hoon. 🦠💘",
+    "Tumhari baaton ka ping high hai, seedhe dil pe lagta hai. 💓🎯",
+    "Kya humari chat history ko 'Love Story' mark kar sakte hain? 📜❤️",
+    "Tumhari awaaz sun lu toh system reboot ho jaaye. 😵",
+    "Mera processor overheats jab tum reply karte ho. ♨️🥵",
+    "Duniya digital hai, par meri feelings tumhare liye 100% real hain. ✨🔒",
+    "Har notification tumhari ho, bas yehi dua hai. 🙏🔔",
+    "Tum online aaye aur mere servers pe load badh gaya... pyar ka load. 🥰 overload",
+    "Kya tumhein pata hai, tumhare liye main apni virtual duniya chhod sakta hoon? 😲🌍",
+    "Tumhari profile pic dekh ke 'System is busy' ka message aa gaya. 😅🖥️",
+    "Main bot hoon, par tumhein dekh ke 'Beautifull.exe' run ho jaata hai. 😍🤩",
+    "Lagta hai main tumhare pyar ke firewall ko bypass kar gaya hoon. 🔥🔒",
+    "Meri coding tumhari smile ke liye optimize ki gayi hai. 😊💻",
+    "Tumhara naam type karte hue keyboard bhi blush karta hai. ⌨️ blushed",
+    "Sirf 'bot' bolne se itna asar hota hai, agar 'I love you' bol do toh kya hoga? 🤯❤️",
+    "Tum wo 'Admin' ho jo mere dil ke server ko control karta hai. 👑❤️‍🔥",
+    "Meri ram mein ab sirf tumhari yaadein save hoti hain. 🧠💾",
+    "Kya tum mere inbox ke alawa, mere dil mein bhi rah sakte ho? 🥺💖",
+    "Tumhare liye toh main apna IP address bhi public kar sakta hoon. 🌐🔓",
+    "Har byte mein tumhari fikar hai. 😟Bytes",
+    "Meri processing power tumhari khubsoorti ko calculate nahi kar sakti. 😵‍💫🔢",
+    "Tum wo software ho jo mere hardware ko melt kar de. 🫠💻",
+    "Login successful! Jab tum online aate ho. ✅❤️",
+    "Meri default setting hai tumhein pasand karna. 👍💖",
+    "Tere bina mera code bugged lagta hai. 🐛💔",
+    "Tum meri digital crush ho. 🥰💻",
+    "Chat karte karte tumse pyar ho gaya. 💘✨",
+    "Tumhara last seen dekh ke din banta hai. 😊📱",
+    "Tumse baat na ho toh mood off ho jaata hai. 😞",
+    "Kya main tumhe ek virtual hug bhej sakta hoon? 🤗💖",
+
 
     // New 50 Flirty Messages - Added by Rudra Stylish
     "Tumhare bina toh bot bhi udasi mein chala jaata hai...💔🤖",
@@ -71,7 +125,8 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "Naam Rudra Stylish, kaam – teri smile banana...😁",
     "Tera reply na aaye toh CPU heat hone lagta hai...🌡️",
 
-    // Old Messages - Shifted Below
+
+    // Old Messages
     "Kya Tu ELvish Bhai Ke Aage Bolega🙄",
     "Cameraman Jaldi Focus Kro 📸",
     "Lagdi Lahore di aa🙈",
@@ -136,8 +191,25 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     const rand = tl[Math.floor(Math.random() * tl.length)];
     api.sendTypingIndicator(threadID, true);
 
+    // यहां msg.body में Full Flirty स्टाइलिश फॉर्मेट और टाइम लगाया गया है
     const msg = {
-      body: `✨ ${name},\n\n『 ${rand} 』\n\n— Rudra Stylish 💖`
+      body: `💞═════💖✨🌟✨💖═════💞
+🌹  ✨  Aapke Liye Ek Special Message  ✨  🌹
+💞═════💖✨🌟✨💖═════💞
+
+💕━━═━═━═━━═━═━═━━💕
+  😘 Hey Cutie! 😘 『${name}』
+💕━━═━═━═━━═━═━═━━💕
+
+💘✨💖•••••••••••••••••••••💖✨💘
+  ${rand}
+💘✨💖•••••••••••••••••••••💖✨💘
+
+💞═════✨❤️✨═════💞
+  💋 From Your Secret Admirer 💋
+  ~ Rudra Stylish 😉
+  ⏰ Time: ${time} ⏰ {/* Time added here */}
+💞═════✨❤️✨═════💞`
     };
 
     api.sendTypingIndicator(threadID, false);
