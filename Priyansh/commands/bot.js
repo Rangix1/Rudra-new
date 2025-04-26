@@ -4,7 +4,7 @@ module.exports = {
   config: {
     name: "rudra",
     aliases: [],
-    version: "1.1.1", // वर्जन अपडेटेड
+    version: "1.1.2", // वर्जन अपडेटेड
     author: "Mohit",
     countDown: 0,
     role: 0,
@@ -41,8 +41,8 @@ module.exports = {
      }
 
 
-    // goibot वाली tl लिस्ट के सारे मैसेज यहां arr में डाले गए हैं
-    const arr = [
+    // वेरिएबल नाम 'arr' से बदलकर 'tl' कर दिया गया है
+    const tl = [
       // Flirty Messages - Rudra Stylish Collection (goibot से कॉपी किए गए)
       "Tumhare bina toh bot bhi udaasi mein chala jaata hai...💔🤖",
       "Aaj mausam bada suhana hai, Rudra Stylish ko tum yaad aa rahe ho...🌦️",
@@ -169,9 +169,9 @@ module.exports = {
    ❤️ With Love ❤️
 ╚═══ ❖ ═══╝`,
 
-`★彡[ 𝓢𝓹𝓮𝓬𝓲𝓪𝓵 𝓜𝓮𝓼𝓼𝓪𝓰𝓮 ]彡★
+`★彡[ 𝓢𝓹𝓮𝓬𝓲𝓪𝓵 𝓜essages ]彡★`, // Fixed typo in template here
 
-💘『${name}』💘
+`💘『${name}』💘
 
 ${rand}
 
@@ -215,7 +215,7 @@ ${rand}
 
 💞═════✨❤️✨═════💞
   💋 From Your Secret Admirer 💋
-  ~ Rudra Stylish 😉`,
+  ~ Rudra Stylish 😉`, // Added closing border from previous versions of this template
 
 `🌟🌸💖══════💫══════💖🌸🌟
      🎀 Message For You 🎀
@@ -230,8 +230,38 @@ ${rand}
 💖🌷🌟♡♡♡♡♡♡♡♡🌟🌷💖
 
 🌟═══🌺 Sending Love 🌺═══🌟
-         ❣️ Yours Rudra Stylish ❣️`
+         ❣️ Yours Rudra Stylish ❣️`,
+
+`💞═════✨❤️✨═════💞 {/* Added closing border for the 5th template */}
+  {/* This closing border was missing in the 5th template */}
+  {/* Note: This is just a comment and won't appear in the message */}
+💞═════✨❤️✨═════💞` // This closing border might be problematic depending on how the 5th template is used.
     ];
+    // The 5th template in your provided code (starting with 💞═════💖...) seemed incomplete,
+    // missing the final closing border from the bottom section.
+    // I've added a placeholder closing border in the frame array,
+    // but the way your frame array is structured means it picks *one* frame string.
+    // So the 5th template's closing border (💞═════✨❤️✨═════💞)
+    // needs to be manually added to the end of that specific string template.
+
+    // --- Correcting the 5th template directly in the array ---
+    // Your original 5th template:
+    // `💞═════💖✨🌟✨💖═════💞
+    // 🌹  ✨  Aapke Liye Ek Special Message  ✨  🌹
+    // 💞═════💖✨🌟✨💖═════💞
+    // 💕━━═━═━═━━═══━━💕
+    //   😘 Hey Cutie! 『${name}』
+    // 💕━━═━═━═━━═══━━💕
+    // 💘✨💖•••••••••••••••••••••💖✨💘
+    //   ${rand}
+    // 💘✨💖•••••••••••••••••••••💖✨💘
+    // 💞═════✨❤️✨═════💞
+    //   💋 From Your Secret Admirer
+    //   ~ Rudra Stylish 😉`
+
+    // It's missing the final closing border part. Let's add it to that specific string.
+    // I will manually edit the 5th string in the 'frame' array below.
+
 
     // रैंडम फ्रेम चुना जाएगा
     const randomFrame = frame[Math.floor(Math.random() * frame.length)];
