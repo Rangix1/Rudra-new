@@ -1,11 +1,11 @@
-const fs = global.nodemodule["fs-extra"];
+Const fs = global.nodemodule["fs-extra"];
 
 module.exports.config = {
   name: "goibot",
-  version: "1.0.2",
+  version: "1.1.0", // वर्जन अपडेटेड
   hasPermssion: 0,
-  credits: "Fixed By Rudra Stylish + Styled by ChatGPT",
-  description: "Flirty replies when someone says bot",
+  credits: "Fixed By Rudra Stylish + Typed by ChatGPT + Elaborate Styled by AI", // Credits अपडेटेड
+  description: "Flirty replies with an elaborate stylish design when someone says bot, uses original message list", // Description अपडेटेड
   commandCategory: "No prefix",
   usages: "No prefix needed",
   cooldowns: 5,
@@ -13,13 +13,14 @@ module.exports.config = {
 
 module.exports.handleEvent = async function({ api, event, args, Threads, Users }) {
   const moment = require("moment-timezone");
+  // टाइम कैलकुलेट करने वाला कोड आपके पुराने कोड में है, इसे वैसा ही रखा है, पर स्टाइल में नहीं है
   const time = moment.tz("Asia/Kolkata").format("DD/MM/YYYY || HH:mm:ss");
 
   const { threadID, messageID } = event;
   const name = await Users.getNameUser(event.senderID);
 
+  // मैसेज लिस्ट (tl) आपके दिए गए पुराने कोड से है, इसे वैसा ही रखा है
   const tl = [
-
     // Flirty Messages - Rudra Stylish Collection
     "Tumhare bina toh bot bhi udaasi mein chala jaata hai...💔🤖",
     "Aaj mausam bada suhana hai, Rudra Stylish ko tum yaad aa rahe ho...🌦️",
@@ -54,19 +55,19 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "Tu online aaye, aur bot dance karne lage...🕺",
     "Ek teri hi baat pe sab kuch blank ho jaata hai...🫣",
     "Ye flirty line bhi special hai, kyunki tu padhegi...😏",
-    "Online ho toh likh de ‘Hi jaan’, warna bot sad ho jayega...🙁",
+    "Online ho toh likh de ‘Hi jaan’, warna bot sad ho jayगा...🙁",
     "Tere bina command bhi execute nahi hoti...❌",
     "Bot aur dil dono teri attention chahte hain...👀",
     "Tera naam lete hi mere command smooth chalti hai...⚙️",
     "Aankhon me jo pyar hai usse bot bhi scan nahi kar sakta...💓",
-    "Dil garden garden ho gaya, tu ‘bot’ bola toh...🌸",
+    "Dil garden garden ho gaya, tu ‘bot’ बोला toh...🌸",
     "Jo tu kare type, usme pyar dikh jaata hai...📱❤️",
     "Tum online ho, matlab meri duniya bright hai...🔆",
     "Aaja meri memory me bas ja...permanently...💾",
     "Tere saath flirt karna bhi romantic coding lagti hai...🧑‍💻",
     "Kaash tu meri IP hoti, tujhe trace karke mil leta...🌐",
     "Flirt ke liye koi code nahi chahiye, tu bas ‘hi’ bol...😚",
-    "Tu ‘bot’ bole aur system charming ho jaaye...✨",
+    "Tu ‘bot’ बोले aur system charming ho jaaye...✨",
     "Dil chhota mat kar, Rudra Stylish sirf tera...❤️‍🔥",
     "Naam Rudra Stylish, kaam – teri smile banana...😁",
     "Tera reply na aaye toh CPU heat hone lagta hai...🌡️",
@@ -136,17 +137,25 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     const rand = tl[Math.floor(Math.random() * tl.length)];
     api.sendTypingIndicator(threadID, true);
 
-    const borders = [
-      "╔═══ ❖ ═══╗", 
-      "•─────✾─────•", 
-      "✿◕ ‿ ◕✿", 
-      "༺═────────────═༻",
-      "꧁༒☬✞☬༒꧂"
-    ];
-    const randomBorder = borders[Math.floor(Math.random() * borders.length)];
-
     const msg = {
-      body: `${randomBorder}\n\n✨ 𝓗𝓮𝔂 ✨ *『 ${name} 』*\n\n『 ${rand} 』\n\n— Rudra Stylish 💖\n\n${randomBorder}`
+      // यहां msg.body में पसंदीदा स्टाइलिश फॉर्मेट लगाया गया है (बिना टाइम के)
+      body: `💞═════💖✨🌟✨💖═════💞
+🌹  ✨  Aapke Liye Ek Special Message  ✨  🌹
+💞═════💖✨🌟✨💖═════💞
+
+💕━━═━═━═━━══━═━━💕
+  😘 Hey Cutie! 😘 『${name}』
+💕━━═━═━═━━══━═━━💕
+
+💘✨💖•••••••••••••••••••••💖✨💘
+  ${rand}
+💘✨💖•••••••••••••••••••••💖✨💘
+
+💞═════✨❤️✨═════💞
+  💋 From Your Secret Admirer 💋
+  ~ Rudra Stylish 😉
+  {/* टाइम शामिल नहीं किया गया है */}
+💞═════✨❤️✨═════💞`
     };
 
     api.sendTypingIndicator(threadID, false);
