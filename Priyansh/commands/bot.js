@@ -4,7 +4,7 @@ module.exports.config = {
   name: "goibot",
   version: "1.0.2",
   hasPermssion: 0,
-  credits: "Fixed By Rudra Stylish + Styled by ChatGPT + Added new templates by Google Gemini", // Added credit for adding templates
+  credits: "Fixed By Rudra Stylish + Styled by ChatGPT",
   description: "Flirty replies when someone says bot",
   commandCategory: "No prefix",
   usages: "No prefix needed",
@@ -87,43 +87,10 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "dhann khachh booyaah"
   ];
 
-  const specialTemplates = [
-    `1💞═════💖✨🌟✨💖═════💞
-🌹  ✨  Aapke Liye Ek Special Message  ✨  🌹
-💞═════💖✨🌟✨💖═════💞
-
-💕━━═━═━═━━═══━━💕
-  😘 Hey Cutie! 😘 『${name}』
-💕━━═━═━═━━═══━━💕
-
-💘✨💖•••••••••••••••••••••💖✨💘
-  ${rand}
-💘✨💖•••••••••••••••••••••💖✨💘
-
-💞═════✨❤️✨═════💞
-  💋 From Your Secret Admirer 💋
-  ~ Rudra Stylish 😉`,
-
-    `2🌟🌸💖══════💫══════💖🌸🌟
-     🎀 Message For You 🎀
-🌟🌸💖══════💫══════💖🌸🌟
-
-💝💌➳༄➳༄➳༄➳༄➳༄➳💌💝
-  🥰 Hello Sweetheart! 🥰 『${name}』
-💝💌➳༄➳༄➳༄➳༄➳༄➳💌💝
-
-💖🌷🌟♡♡♡♡♡♡♡♡🌟🌷💖
-  ${rand}
-💖🌷🌟♡♡♡♡♡♡♡♡🌟🌷💖
-
-🌟═══🌺 Sending Love 🌺═══🌟
-         ❣️ Yours Rudra Stylish ❣️`
-  ];
-
   const borders = [
-    "╔═══ ❖ ═══╗",
-    "•─────✾─────•",
-    "✿◕ ‿ ◕✿",
+    "╔═══ ❖ ═══╗", 
+    "•─────✾─────•", 
+    "✿◕ ‿ ◕✿", 
     "༺═────────────═༻",
     "꧁༒☬✞☬༒꧂",
     "┏━━━✦❘༻༺❘✦━━━┓",
@@ -139,29 +106,13 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
   ];
 
   if (event.body?.toLowerCase().startsWith("bot")) {
+    const rand = tl[Math.floor(Math.random() * tl.length)];
+    const randomBorder = borders[Math.floor(Math.random() * borders.length)];
+    
     api.sendTypingIndicator(threadID, true);
-
-    // Decide whether to use a special template or the standard format
-    const useSpecialTemplate = Math.random() < 0.3; // 30% chance to use a special template
-
-    let msgBody;
-    let selectedRand = tl[Math.floor(Math.random() * tl.length)]; // Select a random message from tl
-
-    if (useSpecialTemplate && specialTemplates.length > 0) {
-      // Use a special template
-      const selectedTemplate = specialTemplates[Math.floor(Math.random() * specialTemplates.length)];
-      // Replace placeholders in the selected template
-      msgBody = selectedTemplate
-        .replace(/\$\{name\}/g, name)
-        .replace(/\$\{rand\}/g, selectedRand); // Use the randomly selected tl message as ${rand}
-    } else {
-      // Use the standard format
-      const randomBorder = borders[Math.floor(Math.random() * borders.length)];
-      msgBody = `${randomBorder}\n\n✨ 𝓗𝓮𝔂 ✨ *『 ${name} 』*\n\n『 ${selectedRand} 』\n\n— Rudra Stylish 💖\n\n${randomBorder}`;
-    }
-
+    
     const msg = {
-      body: msgBody
+      body: `${randomBorder}\n\n✨ 𝓗𝓮𝔂 ✨ *『 ${name} 』*\n\n『 ${rand} 』\n\n— Rudra Stylish 💖\n\n${randomBorder}`
     };
 
     api.sendTypingIndicator(threadID, false);
