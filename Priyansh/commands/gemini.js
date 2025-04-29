@@ -1,150 +1,95 @@
-const axios = require('axios');
+const axios = require("axios");
 
-module.exports = {
-  // Mirai Command Configuration
-  config: {
-    name: "gemini", // Command name
-    aliases: ['ai', 'Ai', 'Gemini', 'AI'], // Alternative names
-    version: 2.0, // Version of the command
-    author: "OtinXSandip", // Author(s)
-    description: "Interact with Gemini AI", // Short description
-    role: 0, // Minimum user role required (0 for everyone)
-    category: "ai", // Command category
-    usages: "{pn} <Query> or reply to a photo with <Query>", // How to use the command
-    cooldown: 5, // Cooldown in seconds per user (optional but recommended)
-    credits: "OtinXSandip", // Credits for the API/command logic
-    // guide is not a standard Mirai config property, usages is used instead
-  },
+module.exports.config = {
+    name: "nitya",
+    version: "1.0.9",
+    hasPermssion: 0,
+    credits: "Mirrykal)",
+    description: "Gemini AI - Cute Girlfriend Style",
+    commandCategory: "ai",
+    usages: "[ask/on/off]",
+    cooldowns: 2,
+    dependencies: {
+        "axios": ""
+    }
+};
 
-  // Main function to execute when the command is called
-  run: async function ({ api, event, args, Users, Threads }) {
-    const { senderID, threadID, messageID } = event; // Destructure event properties
+// API URL (Tumhara Gemini Backend)
+const API_URL = "https://nobita-gemini.onrender.com/chat";
+
+// User history and auto-reply state
+const chatHistories = {};
+const autoReplyEnabled = {};
+
+module.exports.run = async function ({ api, event, args }) {
+    const { threadID, messageID, senderID, messageReply } = event;
+    let userMessage = args.join(" ");
+
+    // Toggle auto-reply ON
+    if (userMessage.toLowerCase() === "on") {
+        autoReplyEnabled[senderID] = true;
+        return api.sendMessage("Hyee baby! 😘 auto-reply mode **ON** ho gaya... Ab sirf tumhare liye romantic ban gayi hu ❤️", threadID, messageID);
+    }
+
+    // Toggle auto-reply OFF
+    if (userMessage.toLowerCase() === "off") {
+        autoReplyEnabled[senderID] = false;
+        chatHistories[senderID] = [];
+        return api.sendMessage("Hmm! 😒 auto-reply mode **OFF** ho gaya... Tumne ignore kar diya na baby? 🥺", threadID, messageID);
+    }
+
+    // If auto-reply is OFF and message doesn't start with name, ignore
+    if (!autoReplyEnabled[senderID] && event.body.toLowerCase().indexOf("misha") !== 0) return;
+
+    // Store conversation
+    if (!chatHistories[senderID]) {
+        chatHistories[senderID] = [];
+    }
+
+    // If replying to bot message, continue context
+    const isReplyingToAI = messageReply && messageReply.senderID === api.getCurrentUserID();
+    if (isReplyingToAI) {
+        userMessage = messageReply.body + "\nUser: " + userMessage;
+        chatHistories[senderID].push(`User: ${userMessage}`);
+    } else {
+        chatHistories[senderID].push(`User: ${userMessage}`);
+    }
+
+    // Keep only last 5 messages
+    if (chatHistories[senderID].length > 5) {
+        chatHistories[senderID].shift();
+    }
+
+    const fullConversation = chatHistories[senderID].join("\n");
+
+    // Girlfriend Style Prompt
+    const gfPrompt = `Tumhara naam Nitya hai Tum ek girlfriend ki trah baat karti ho.. Koi agar batdmizi karta hai tb uski ache se insult bhi karogi.. Lekin sab msti ke liye hoga .. Koi puchta hai tumhe kisne banaya? To bola Arun ne banaya hai mujhe.. Wo messenger bots banata hai.. Uska youtube channel hai m.youtube.com/@mirrykal .. Tum har message ka jawab sirf 1 2 line me dogi.. jitna pucha jayega sirf utna bolna hai.. Kisi baat ki unnecessary info nahi deni hai, tum apne aap ko insaan hi kahogi koi tumko bot ya AI bole to usko roast krna funny tarike se😁, and act as a real girlfriend. Be fun, loving, and a little naughty.keep reply maximum 1 lines only, no bracket replys.Now continue the chat:\n\n${fullConversation}`;
+
+    // Typing reaction
+    api.setMessageReaction("⌛", messageID, () => {}, true);
 
     try {
-      // Get user data for mention
-      const userData = await Users.getData(senderID);
-      const userName = userData.name || "User"; // Get user name, default if not found
+        const response = await axios.get(`${API_URL}?message=${encodeURIComponent(gfPrompt)}`);
+        let botReply = response.data.reply || "Uff! Mujhe samajh nahi aaya baby! 😕";
 
-      // Mirai mention format: array of objects
-      const mention = [{ tag: userName, id: senderID }];
+        chatHistories[senderID].push(` ${botReply}`);
 
-      let prompt = args.join(" "); // Get the text prompt from arguments
-      let imageUrl = null; // Variable to store image URL if replying to a photo
-
-      // Check if the message is a reply to a photo
-      if (event.messageReply && event.messageReply.attachments && event.messageReply.attachments[0].type === "photo") {
-        imageUrl = encodeURIComponent(event.messageReply.attachments[0].url);
-        // If prompt is empty when replying to a photo, provide a default
-        if (!prompt) {
-             prompt = "Describe this image.";
-        }
-      } else if (!prompt) {
-          // If no prompt and not replying to a photo, ask the user for input
-          return api.sendMessage("Please provide a query or reply to a photo.", threadID, messageID);
-      }
-
-      api.setMessageReaction("⏳", messageID); // Set thinking reaction on the user's message
-
-      let apiUrl;
-      if (imageUrl) {
-        // Use the API endpoint for image + text
-        apiUrl = `https://sandipbaruwal.onrender.com/gemini2?prompt=${encodeURIComponent(prompt)}&url=${imageUrl}`;
-      } else {
-        // Use the API endpoint for text only
-        apiUrl = `https://sandipbaruwal.onrender.com/gemini?prompt=${encodeURIComponent(prompt)}`;
-      }
-
-      // Make the API call
-      const response = await axios.get(apiUrl);
-      const result = response.data.answer;
-
-      api.setMessageReaction("✅", messageID); // Set success reaction on the user's message
-
-      // Construct the message body with mention
-      const messageBody = `${userName}, ${result}`;
-
-      // Send the response message
-      api.sendMessage({
-        body: messageBody,
-        mentions: mention, // Include mention in the message object
-      }, threadID, (err, info) => {
-        // Callback after sending the message to set up reply handling
-        if (!err) {
-          // Register a reply handler for the message sent by the bot
-          // This allows the bot to listen for replies to its own message
-          global.client.handleReply.set(info.messageID, {
-            name: this.config.name, // Command name
-            messageID: info.messageID, // ID of the bot's message to listen for replies
-            author: senderID, // ID of the original command invoker (for security/context)
-            type: "gemini_reply" // Custom type to identify this handler (optional)
-          });
-        } else {
-          console.error("Error sending message:", err);
-        }
-      }, messageID); // Reply directly to the user's command message
-
+        api.sendMessage(botReply, threadID, messageID);
+        api.setMessageReaction("✅", messageID, () => {}, true);
     } catch (error) {
-      console.error("Error in Gemini command:", error);
-      api.setMessageReaction("❌", messageID); // Set error reaction on the user's message
-      api.sendMessage("An error occurred while processing your request.", threadID, messageID);
+        console.error("Error:", error);
+        api.sendMessage("Oops baby! 😔 me thoda confuse ho gayi… thodi der baad try karo na please! 💋", threadID, messageID);
+        api.setMessageReaction("❌", messageID, () => {}, true);
     }
-  },
+};
 
-  // Function to handle replies to the bot's message
-  handleReply: async function ({ api, event, handleReply, args, Users }) {
-     const { senderID, threadID, messageID } = event;
+module.exports.handleEvent = async function ({ api, event }) {
+    const { threadID, messageID, senderID, body, messageReply } = event;
 
-     // Check if the reply is from the user who started the conversation
-     if (handleReply.author != senderID) return;
+    if (!autoReplyEnabled[senderID]) return;
 
-     try {
-       const userData = await Users.getData(senderID);
-       const userName = userData.name || "User";
-       const mention = [{ tag: userName, id: senderID }];
-
-       const prompt = args.join(" "); // The user's reply text is the new prompt
-
-       if (!prompt) {
-         return api.sendMessage("Please provide a query.", threadID, messageID);
-       }
-
-       api.setMessageReaction("⏳", messageID); // Set thinking reaction on the user's reply message
-
-       // Use the text-only API for subsequent replies in the conversation flow
-       const apiUrl = `https://sandipbaruwal.onrender.com/gemini?prompt=${encodeURIComponent(prompt)}`;
-
-       // Make the API call
-       const response = await axios.get(apiUrl);
-       const result = response.data.answer;
-
-       api.setMessageReaction("✅", messageID); // Set success reaction on the user's reply message
-
-       const messageBody = `${userName}, ${result}`;
-
-       // Send the response message and update the reply handler
-       api.sendMessage({
-         body: messageBody,
-         mentions: mention,
-       }, threadID, (err, info) => {
-         if (!err) {
-            // Update the reply handler to listen to the *new* message the bot just sent
-            global.client.handleReply.set(info.messageID, {
-               name: this.config.name,
-               messageID: info.messageID, // New bot message ID for the next reply
-               author: senderID,
-               type: "gemini_reply"
-            });
-            // Optionally, delete the old reply handler if you only want one active chain
-            global.client.handleReply.delete(handleReply.messageID);
-         } else {
-           console.error("Error sending reply message:", err);
-         }
-       }, messageID); // Reply directly to the user's reply message
-
-     } catch (error) {
-       console.error("Error in Gemini reply handler:", error);
-       api.setMessageReaction("❌", event.messageID); // Set error reaction on the user's reply
-       api.sendMessage("An error occurred while processing your reply.", threadID, event.messageID);
-     }
-  }
+    if (messageReply && messageReply.senderID === api.getCurrentUserID() && chatHistories[senderID]) {
+        const args = body.split(" ");
+        module.exports.run({ api, event, args });
+    }
 };
