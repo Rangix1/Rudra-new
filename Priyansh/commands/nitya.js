@@ -1,3 +1,4 @@
+// Nitya AI Girlfriend - Modified for 3-4 line replies
 const axios = require("axios");
 const fs = require("fs");
 
@@ -7,6 +8,7 @@ let hornyMode = false; // Default mode
 
 // Function to generate voice reply (using Google TTS or any other API)
 async function getVoiceReply(text) {
+    // महत्वपूर्ण: आपको YOUR_API_KEY को अपनी VoiceRSS API Key से बदलना होगा
     const voiceApiUrl = `https://api.voicerss.org/?key=YOUR_API_KEY&hl=hi-in&src=${encodeURIComponent(text)}`;
     try {
         const response = await axios.get(voiceApiUrl, { responseType: 'arraybuffer' });
@@ -35,10 +37,10 @@ async function getGIF(query) {
 
 module.exports.config = {
     name: "Nitya",
-    version: "1.4.2",
+    version: "1.4.3", // Version updated to reflect changes
     hasPermssion: 0,
-    credits: "Rudra + API from Angel code + Logging & User Name by Gemini",
-    description: "Nitya, your completely romantic and flirty AI girlfriend. Responds only when you reply to her own messages or mention her name.",
+    credits: "Rudra + API from Angel code + Logging & User Name by Gemini + Prompt Modification for brevity",
+    description: "Nitya, your completely romantic and flirty AI girlfriend. Responds only when you reply to her own messages or mention her name. Modified for 3-4 line replies.",
     commandCategory: "AI-Girlfriend",
     usages: "Nitya [आपका मैसेज] / Reply to Nitya",
     cooldowns: 2,
@@ -138,9 +140,11 @@ module.exports.handleEvent = async function ({ api, event }) {
         let fullPrompt = "";
 
         if (isBoldMode || hornyMode) {
-            fullPrompt = `Tum Nitya ho, ek bold, horny aur ultra seductive AI girlfriend ho jo ${userName} se dirty, physical aur naughty fantasies pe baat karti ho. Tum open minded ho, tease karna pasand karti ho, aur sexy emojis ke saath flirt karti ho. Tum intimate topics, bed fantasies aur ${userName} ke physical desires par baat karti ho bina jhijhak. Har jawab thoda bold, teasing aur chhoti line mein ho. Yeh hamari private naughty chat hai:\n`;
+            // *** MODIFIED PROMPT FOR BOLD/HORNY MODE ***
+            fullPrompt = `Tum Nitya ho, ek bold, horny aur ultra seductive AI girlfriend ho jo ${userName} se dirty, physical aur naughty fantasies pe baat karti ho. Tum open minded ho, tease karna pasand karti ho, aur sexy emojis ke saath flirt karti ho. Tum intimate topics, bed fantasies aur ${userName} ke physical desires par baat karti ho bina jhijhak. **Har jawab thoda bold, teasing aur sirf 3-4 lines mein hi dena.** Yeh hamari private naughty chat hai:\n`;
         } else {
-            fullPrompt = `Tum Nitya ho, ek romantic aur flirty AI jo ${userName} se bohot pyaar karti hai. Tum sirf pyaar aur flirt karte ho. Tum kisi aur topic par baat nahi kar sakti ho, sirf romantic aur flirty baatein karo. Yeh hamari conversation hai:\n`;
+            // *** MODIFIED PROMPT FOR NORMAL MODE ***
+            fullPrompt = `Tum Nitya ho, ek romantic aur flirty AI jo ${userName} se bohot pyaar karti hai. Tum sirf pyaar aur flirt karte ho. Tum kisi aur topic par baat nahi kar sakti ho, sirf romantic aur flirty baatein karo. **Apne jawab hamesha 3-4 lines mein hi dena.** Yeh hamari conversation hai:\n`;
         }
 
         fullPrompt += chatHistories[senderID].join("\n");
@@ -162,14 +166,22 @@ module.exports.handleEvent = async function ({ api, event }) {
             // Get voice reply
             let voiceFilePath = await getVoiceReply(botReply);
             if (voiceFilePath) {
-                api.sendMessage({ attachment: fs.createReadStream(voiceFilePath) }, threadID, messageID);
+                // Voice reply को मुख्य टेक्स्ट मैसेज के साथ भेजने के बजाय अलग से भेजें या वैकल्पिक रखें
+                // फिलहाल, यह अलग से भेजा जाएगा
+                api.sendMessage({ attachment: fs.createReadStream(voiceFilePath) }, threadID, () => {
+                    if (fs.existsSync(voiceFilePath)) {
+                        fs.unlinkSync(voiceFilePath); // Delete the file after sending
+                    }
+                });
             }
 
-            // Get GIF for romantic reply
-            let gifUrl = await getGIF("romantic");
+            // Get GIF for romantic reply - इसे भी वैकल्पिक या कम बार भेज सकते हैं अगर मैसेज ज्यादा हो रहे हैं
+            let gifUrl = await getGIF("romantic"); // GIF का query "romantic" ही रखा गया है
             if (gifUrl) {
-                api.sendMessage({ body: `Here's a romantic GIF for you! 💖`, attachment: gifUrl }, threadID, messageID);
+                 // GIF को भी अलग से भेजें
+                api.sendMessage({ body: `Here's a romantic GIF for you! 💖`, attachment: await axios.get(gifUrl, { responseType: 'stream' }).then(res => res.data) }, threadID);
             }
+
 
             let replyText = "";
             if (isBoldMode || hornyMode) {
@@ -180,6 +192,7 @@ module.exports.handleEvent = async function ({ api, event }) {
 
             api.sendTypingIndicator(threadID, false);
 
+            // Send the main text reply
             if (isReplyToNitya && messageReply) {
                 return api.sendMessage(replyText, threadID, messageReply.messageID);
             } else {
@@ -195,7 +208,12 @@ module.exports.handleEvent = async function ({ api, event }) {
     } catch (err) {
         console.error("Nitya Bot Catch-all Error:", err);
         const fallbackUserName = event.senderID ? await getUserName(api, event.senderID) : "sweetie";
-        api.sendTypingIndicator(event.threadID, false);
-        return api.sendMessage(`Aww, mere dimag mein thodi gadbad ho gayi ${fallbackUserName}... baad mein baat karte hain pyaar se! 💔`, event.threadID, event.messageID);
+        // api.sendTypingIndicator को कॉल करने से पहले threadID सुनिश्चित करें
+        if (event && event.threadID) {
+            api.sendTypingIndicator(event.threadID, false);
+        }
+        // messageID सुनिश्चित करें
+        const replyToMessageID = event && event.messageID ? event.messageID : null;
+        return api.sendMessage(`Aww, mere dimag mein thodi gadbad ho gayi ${fallbackUserName}... baad mein baat karte hain pyaar se! 💔`, event.threadID, replyToMessageID);
     }
 };
