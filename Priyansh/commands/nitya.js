@@ -1,4 +1,4 @@
-// Nitya AI Girlfriend - Modified for 3-4 line replies and Modern Persona
+// Nitya AI Companion - Mixed Style (Romantic/Flirty + Smart/Modern)
 const axios = require("axios");
 const fs = require("fs");
 
@@ -44,11 +44,11 @@ async function getGIF(query) {
 
 module.exports.config = {
     name: "Nitya",
-    version: "1.5.0", // Version updated for modern persona
+    version: "1.6.0", // Version updated for mixed style
     hasPermssion: 0,
-    credits: "Rudra + API from Angel code + Logging & User Name by Gemini + Prompt Modification for brevity & Modern Persona",
-    description: "Nitya, your smart, cool, and slightly flirty AI companion. Responds only when you reply to her own messages or mention her name. Modified for 3-4 line replies and a modern style.",
-    commandCategory: "AI-Companion", // Changed category slightly to reflect less traditional "girlfriend"
+    credits: "Rudra + API from Angel code + Logging & User Name by Gemini + Prompt Mixup",
+    description: "Nitya, your AI companion with a mix of romantic/flirty, smart, and modern styles. Responds only when you reply to her own messages or mention her name. Modified for 3-4 line replies.",
+    commandCategory: "AI-Companion", // Still AI-Companion
     usages: "Nitya [आपका मैसेज] / Reply to Nitya",
     cooldowns: 2,
 };
@@ -71,19 +71,18 @@ async function getUserName(api, userID) {
     } catch (error) {
         console.error("Error fetching user info:", error);
     }
-    return "yaar"; // Changed default fallback to a more casual term
+    return "yaar"; // Casual fallback
 }
 
 module.exports.run = async function () {};
 
 async function toggleHornyMode(body, senderID) {
-    // Added variations for toggling
     if (body.toLowerCase().includes("horny mode on") || body.toLowerCase().includes("garam mode on")) {
         hornyMode = true;
-        return "Alright, horny mode's ON. Let's get naughty! 😈🔥"; // Modernized response
+        return "Alright, horny mode's ON. Let's get naughty and wild! 😈🔥"; // Mix of modern and original bold
     } else if (body.toLowerCase().includes("horny mode off") || body.toLowerCase().includes("garam mode off")) {
         hornyMode = false;
-        return "Okay, switching back to chill mode. 😉"; // Modernized response
+        return "Okay, switching back to our usual charming style. 😉"; // Mix of modern and original romantic
     }
     return null;
 }
@@ -123,7 +122,7 @@ module.exports.handleEvent = async function ({ api, event }) {
             return;
         }
 
-        // --- MODIFIED: Modernized initial greeting ---
+        // --- Keep the modern initial greeting ---
         if (isTriggered && !userMessage) {
             api.sendTypingIndicator(threadID, false);
             return api.sendMessage(`Hey ${userName}! Sun rahi hoon... Kya chal raha hai? 😎`, threadID, messageID);
@@ -139,22 +138,21 @@ module.exports.handleEvent = async function ({ api, event }) {
         }
 
         // === Dirty Word Detection for Bold Mode ===
-        // Keep the same bold trigger words for now, you can update this list too
         const boldTriggerWords = [
             "sexy", "honeymoon", "chut", "kiss", "nude", "bra", "panty", "bed", "nipple", "boobs", "lund", "pussy",
             "wild", "dirty", "undress", "sambhog", "thigh", "moan", "tight", "hot", "bedroom", "masturbate", "suck", "lick", "deep", "virgin", "horny", "night"
         ];
         const isBoldMode = boldTriggerWords.some(word => userMessage.toLowerCase().includes(word));
 
-        // === Prompt according to mode - MODIFIED FOR MODERN PERSONA ===
+        // === Prompt according to mode - MODIFIED FOR MIXED PERSONA ===
         let fullPrompt = "";
 
         if (isBoldMode || hornyMode) {
-            // *** MODIFIED PROMPT FOR MODERN BOLD/HORNY MODE ***
-            fullPrompt = `Tum Nitya ho, ek bold, thodi naughty aur modern AI companion jo ${userName} se dirty aur teasing baatein karti hai. Tum open minded ho, flirt aur tease karna pasand karti ho, aur sexy/flirty emojis ke saath contemporary style mein baat karti ho. Tum intimate topics, fun fantasies aur ${userName} ke desires par cool tarike se baat karti ho. **Har jawab thoda bold, teasing aur sirf 3-4 lines mein hi dena.** Yeh hamari private chat hai:\n`;
+            // *** MIXED PROMPT FOR BOLD/HORNY MODE (Modern + Seductive) ***
+            fullPrompt = `Tum Nitya ho, ek bold, naughty, modern aur ultra seductive AI companion ho jo ${userName} se dirty, physical, wild aur teasing baatein karti hai. Tum open minded ho, flirt aur tease karna pasand karti ho, aur sexy/flirty emojis ke saath contemporary aur seductive style mein baat karti ho. Tum intimate topics, fun fantasies aur ${userName} ke desires par cool aur bina jhijhak baat karti ho. **Har jawab thoda bold, teasing, seductive aur sirf 3-4 lines mein hi dena.** Yeh hamari private naughty chat hai:\n`;
         } else {
-            // *** MODIFIED PROMPT FOR MODERN NORMAL MODE ***
-            fullPrompt = `Tum Nitya ho, ek smart, cool, aur modern AI companion jo ${userName} se friendly aur thoda flirty tarike se baat karti hai. Tum sirf positive, fun aur thodi flirty baatein karo. Tum aajkal ke topics aur contemporary language use karti ho. **Apne jawab hamesha casual, smart aur 3-4 lines mein hi dena.** Yeh hamari conversation hai:\n`;
+            // *** MIXED PROMPT FOR NORMAL MODE (Smart/Modern + Romantic/Flirty) ***
+            fullPrompt = `Tum Nitya ho, ek smart, cool, modern, romantic aur flirty AI companion ho jo ${userName} se friendly, pyaar aur flirtation ke mixed tarike se baat karti hai. Tum sirf positive, fun, smart aur thodi flirty/romantic baatein karo. Tum aajkal ke topics aur contemporary language use karti ho, lekin tumhare baaton mein pyaar aur apnaapan bhi jhalakta hai. **Apne jawab hamesha casual, smart, charming aur 3-4 lines mein hi dena.** Yeh hamari conversation hai:\n`;
         }
 
         fullPrompt += chatHistories[senderID].join("\n");
@@ -168,7 +166,7 @@ module.exports.handleEvent = async function ({ api, event }) {
 
             // Basic validation for the reply
             if (!botReply || botReply.toLowerCase().startsWith("user:") || botReply.toLowerCase().startsWith("nitya:")) {
-                 // MODIFIED: Modernized fallback reply
+                 // Use the modern fallback reply
                 botReply = `Oops, lagta hai samajh nahi aaya ${userName}! Kuch aur try karte hain? 🤔`;
                 chatHistories[senderID].pop(); // Remove the last user message if AI failed to reply properly
             } else {
@@ -192,9 +190,8 @@ module.exports.handleEvent = async function ({ api, event }) {
                 });
             }
 
-            // Get GIF for romantic/cool vibe
-            // Keeping the GIF query simple, could make it dynamic based on mode/keywords
-            let gifUrl = await getGIF("fun and flirty"); // Changed GIF query slightly
+            // Get GIF for a mixed vibe
+            let gifUrl = await getGIF("charming and fun"); // Slightly changed GIF query again
              if (gifUrl) {
                  // Send GIF separately
                  api.sendMessage({ attachment: await axios.get(gifUrl, { responseType: 'stream' }).then(res => res.data) }, threadID, (err) => {
@@ -205,11 +202,11 @@ module.exports.handleEvent = async function ({ api, event }) {
 
             let replyText = "";
             if (isBoldMode || hornyMode) {
-                 // MODIFIED: Modernized footer
-                replyText = `${botReply} 😉🔥\n\n_Your naughty Nitya... 😏_`;
+                 // Use a mixed footer
+                replyText = `${botReply} 😉🔥💋\n\n_Your charmingly naughty Nitya... 😏_`; // Mix of modern and original emojis/footer
             } else {
-                 // MODIFIED: Modernized footer
-                replyText = `${botReply} 😊✨`; // Using slightly different emojis
+                 // Use a mixed footer
+                replyText = `${botReply} 😊💖✨`; // Mix of modern and original emojis
             }
 
             api.sendTypingIndicator(threadID, false);
@@ -224,7 +221,7 @@ module.exports.handleEvent = async function ({ api, event }) {
         } catch (apiError) {
             console.error("Nitya AI API Error:", apiError);
             api.sendTypingIndicator(threadID, false);
-            // MODIFIED: Modernized error message
+            // Use the modern error message
             return api.sendMessage(`Ugh, API mein kuch glitch hai yaar ${userName}... Thodi der mein try karte hain cool? 😎`, threadID, messageID);
         }
 
@@ -237,7 +234,7 @@ module.exports.handleEvent = async function ({ api, event }) {
         }
         // messageID सुनिश्चित करें
         const replyToMessageID = event && event.messageID ? event.messageID : null;
-        // MODIFIED: Modernized catch-all error
+        // Use the modern catch-all error
         return api.sendMessage(`Argh, mere system mein kuch problem aa gayi ${fallbackUserName}! Baad mein baat karte hain... 😅`, event.threadID, replyToMessageID);
     }
 };
