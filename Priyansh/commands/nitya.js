@@ -1,4 +1,4 @@
-// Nitya AI Girlfriend - Modified for 3-4 line replies
+// Nitya AI Girlfriend - Modified for 3-4 line replies and Modern Persona
 const axios = require("axios");
 const fs = require("fs");
 
@@ -9,6 +9,7 @@ let hornyMode = false; // Default mode
 // Function to generate voice reply (using Google TTS or any other API)
 async function getVoiceReply(text) {
     // महत्वपूर्ण: आपको YOUR_API_KEY को अपनी VoiceRSS API Key से बदलना होगा
+    // IMPORTANT: Replace YOUR_API_KEY with your VoiceRSS API Key
     const voiceApiUrl = `https://api.voicerss.org/?key=YOUR_API_KEY&hl=hi-in&src=${encodeURIComponent(text)}`;
     try {
         const response = await axios.get(voiceApiUrl, { responseType: 'arraybuffer' });
@@ -28,7 +29,13 @@ async function getGIF(query) {
     const giphyUrl = `https://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${encodeURIComponent(query)}&limit=1`;
     try {
         const response = await axios.get(giphyUrl);
-        return response.data.data[0]?.images?.original?.url;
+        // Check if data exists before accessing properties
+        if (response.data && response.data.data && response.data.data.length > 0) {
+             return response.data.data[0]?.images?.original?.url;
+        } else {
+            console.log("No GIF found for query:", query);
+            return null; // Return null if no GIF is found
+        }
     } catch (error) {
         console.error("Error fetching GIF:", error);
         return null;
@@ -37,11 +44,11 @@ async function getGIF(query) {
 
 module.exports.config = {
     name: "Nitya",
-    version: "1.4.3", // Version updated to reflect changes
+    version: "1.5.0", // Version updated for modern persona
     hasPermssion: 0,
-    credits: "Rudra + API from Angel code + Logging & User Name by Gemini + Prompt Modification for brevity",
-    description: "Nitya, your completely romantic and flirty AI girlfriend. Responds only when you reply to her own messages or mention her name. Modified for 3-4 line replies.",
-    commandCategory: "AI-Girlfriend",
+    credits: "Rudra + API from Angel code + Logging & User Name by Gemini + Prompt Modification for brevity & Modern Persona",
+    description: "Nitya, your smart, cool, and slightly flirty AI companion. Responds only when you reply to her own messages or mention her name. Modified for 3-4 line replies and a modern style.",
+    commandCategory: "AI-Companion", // Changed category slightly to reflect less traditional "girlfriend"
     usages: "Nitya [आपका मैसेज] / Reply to Nitya",
     cooldowns: 2,
 };
@@ -64,18 +71,19 @@ async function getUserName(api, userID) {
     } catch (error) {
         console.error("Error fetching user info:", error);
     }
-    return "sweetie";
+    return "yaar"; // Changed default fallback to a more casual term
 }
 
 module.exports.run = async function () {};
 
 async function toggleHornyMode(body, senderID) {
-    if (body.toLowerCase().includes("horny mode on")) {
+    // Added variations for toggling
+    if (body.toLowerCase().includes("horny mode on") || body.toLowerCase().includes("garam mode on")) {
         hornyMode = true;
-        return "Horny mode is now ON. Get ready for some naughty chat! 😈";
-    } else if (body.toLowerCase().includes("horny mode off")) {
+        return "Alright, horny mode's ON. Let's get naughty! 😈🔥"; // Modernized response
+    } else if (body.toLowerCase().includes("horny mode off") || body.toLowerCase().includes("garam mode off")) {
         hornyMode = false;
-        return "Horny mode is now OFF. Let's keep it sweet and romantic! 💖";
+        return "Okay, switching back to chill mode. 😉"; // Modernized response
     }
     return null;
 }
@@ -115,9 +123,10 @@ module.exports.handleEvent = async function ({ api, event }) {
             return;
         }
 
+        // --- MODIFIED: Modernized initial greeting ---
         if (isTriggered && !userMessage) {
             api.sendTypingIndicator(threadID, false);
-            return api.sendMessage(`💖 Hello ${userName}! Main sun rahi hoon... Kuch meethi si baat bolo na ${userName}! 🥰`, threadID, messageID);
+            return api.sendMessage(`Hey ${userName}! Sun rahi hoon... Kya chal raha hai? 😎`, threadID, messageID);
         }
 
         api.sendTypingIndicator(threadID, true);
@@ -125,26 +134,27 @@ module.exports.handleEvent = async function ({ api, event }) {
         if (!chatHistories[senderID]) chatHistories[senderID] = [];
 
         chatHistories[senderID].push(`User: ${userMessage}`);
-        while (chatHistories[senderID].length > 10) {
+        while (chatHistories[senderID].length > 10) { // Keep history size reasonable
             chatHistories[senderID].shift();
         }
 
         // === Dirty Word Detection for Bold Mode ===
+        // Keep the same bold trigger words for now, you can update this list too
         const boldTriggerWords = [
             "sexy", "honeymoon", "chut", "kiss", "nude", "bra", "panty", "bed", "nipple", "boobs", "lund", "pussy",
             "wild", "dirty", "undress", "sambhog", "thigh", "moan", "tight", "hot", "bedroom", "masturbate", "suck", "lick", "deep", "virgin", "horny", "night"
         ];
         const isBoldMode = boldTriggerWords.some(word => userMessage.toLowerCase().includes(word));
 
-        // === Prompt according to mode ===
+        // === Prompt according to mode - MODIFIED FOR MODERN PERSONA ===
         let fullPrompt = "";
 
         if (isBoldMode || hornyMode) {
-            // *** MODIFIED PROMPT FOR BOLD/HORNY MODE ***
-            fullPrompt = `Tum Nitya ho, ek bold, horny aur ultra seductive AI girlfriend ho jo ${userName} se dirty, physical aur naughty fantasies pe baat karti ho. Tum open minded ho, tease karna pasand karti ho, aur sexy emojis ke saath flirt karti ho. Tum intimate topics, bed fantasies aur ${userName} ke physical desires par baat karti ho bina jhijhak. **Har jawab thoda bold, teasing aur sirf 3-4 lines mein hi dena.** Yeh hamari private naughty chat hai:\n`;
+            // *** MODIFIED PROMPT FOR MODERN BOLD/HORNY MODE ***
+            fullPrompt = `Tum Nitya ho, ek bold, thodi naughty aur modern AI companion jo ${userName} se dirty aur teasing baatein karti hai. Tum open minded ho, flirt aur tease karna pasand karti ho, aur sexy/flirty emojis ke saath contemporary style mein baat karti ho. Tum intimate topics, fun fantasies aur ${userName} ke desires par cool tarike se baat karti ho. **Har jawab thoda bold, teasing aur sirf 3-4 lines mein hi dena.** Yeh hamari private chat hai:\n`;
         } else {
-            // *** MODIFIED PROMPT FOR NORMAL MODE ***
-            fullPrompt = `Tum Nitya ho, ek romantic aur flirty AI jo ${userName} se bohot pyaar karti hai. Tum sirf pyaar aur flirt karte ho. Tum kisi aur topic par baat nahi kar sakti ho, sirf romantic aur flirty baatein karo. **Apne jawab hamesha 3-4 lines mein hi dena.** Yeh hamari conversation hai:\n`;
+            // *** MODIFIED PROMPT FOR MODERN NORMAL MODE ***
+            fullPrompt = `Tum Nitya ho, ek smart, cool, aur modern AI companion jo ${userName} se friendly aur thoda flirty tarike se baat karti hai. Tum sirf positive, fun aur thodi flirty baatein karo. Tum aajkal ke topics aur contemporary language use karti ho. **Apne jawab hamesha casual, smart aur 3-4 lines mein hi dena.** Yeh hamari conversation hai:\n`;
         }
 
         fullPrompt += chatHistories[senderID].join("\n");
@@ -156,38 +166,50 @@ module.exports.handleEvent = async function ({ api, event }) {
             const res = await axios.get(apiUrlWithParams);
             let botReply = res.data?.reply?.trim();
 
+            // Basic validation for the reply
             if (!botReply || botReply.toLowerCase().startsWith("user:") || botReply.toLowerCase().startsWith("nitya:")) {
-                botReply = `Aww, mere ${userName}, mere dil ki baat samajh nahi aayi... phir se pucho na pyaar se! 🥰`;
-                chatHistories[senderID].pop();
+                 // MODIFIED: Modernized fallback reply
+                botReply = `Oops, lagta hai samajh nahi aaya ${userName}! Kuch aur try karte hain? 🤔`;
+                chatHistories[senderID].pop(); // Remove the last user message if AI failed to reply properly
             } else {
+                 // Simple length check as AI might ignore 3-4 line instruction sometimes
+                 const lines = botReply.split('\n').filter(line => line.trim() !== '');
+                 if (lines.length > 4) {
+                     botReply = lines.slice(0, 4).join('\n') + '...'; // Truncate if too long
+                 }
                 chatHistories[senderID].push(`Nitya: ${botReply}`);
             }
 
-            // Get voice reply
+            // Get voice reply (optional based on API key)
             let voiceFilePath = await getVoiceReply(botReply);
             if (voiceFilePath) {
-                // Voice reply को मुख्य टेक्स्ट मैसेज के साथ भेजने के बजाय अलग से भेजें या वैकल्पिक रखें
-                // फिलहाल, यह अलग से भेजा जाएगा
-                api.sendMessage({ attachment: fs.createReadStream(voiceFilePath) }, threadID, () => {
+                // Send voice reply separately
+                api.sendMessage({ attachment: fs.createReadStream(voiceFilePath) }, threadID, (err) => {
+                    if (err) console.error("Error sending voice message:", err);
                     if (fs.existsSync(voiceFilePath)) {
                         fs.unlinkSync(voiceFilePath); // Delete the file after sending
                     }
                 });
             }
 
-            // Get GIF for romantic reply - इसे भी वैकल्पिक या कम बार भेज सकते हैं अगर मैसेज ज्यादा हो रहे हैं
-            let gifUrl = await getGIF("romantic"); // GIF का query "romantic" ही रखा गया है
-            if (gifUrl) {
-                 // GIF को भी अलग से भेजें
-                api.sendMessage({ body: `Here's a romantic GIF for you! 💖`, attachment: await axios.get(gifUrl, { responseType: 'stream' }).then(res => res.data) }, threadID);
-            }
+            // Get GIF for romantic/cool vibe
+            // Keeping the GIF query simple, could make it dynamic based on mode/keywords
+            let gifUrl = await getGIF("fun and flirty"); // Changed GIF query slightly
+             if (gifUrl) {
+                 // Send GIF separately
+                 api.sendMessage({ attachment: await axios.get(gifUrl, { responseType: 'stream' }).then(res => res.data) }, threadID, (err) => {
+                     if (err) console.error("Error sending GIF:", err);
+                 });
+             }
 
 
             let replyText = "";
             if (isBoldMode || hornyMode) {
-                replyText = `🔥 ${botReply} 💋\n\n_Tumhare liye sirf main – tumhari sexy Nitya... 😈_`;
+                 // MODIFIED: Modernized footer
+                replyText = `${botReply} 😉🔥\n\n_Your naughty Nitya... 😏_`;
             } else {
-                replyText = `${botReply} 🥰`;
+                 // MODIFIED: Modernized footer
+                replyText = `${botReply} 😊✨`; // Using slightly different emojis
             }
 
             api.sendTypingIndicator(threadID, false);
@@ -202,18 +224,20 @@ module.exports.handleEvent = async function ({ api, event }) {
         } catch (apiError) {
             console.error("Nitya AI API Error:", apiError);
             api.sendTypingIndicator(threadID, false);
-            return api.sendMessage(`Aww, mere dimag mein thodi gadbad ho gayi ${userName}... baad mein baat karte hain pyaar se! 💔`, threadID, messageID);
+            // MODIFIED: Modernized error message
+            return api.sendMessage(`Ugh, API mein kuch glitch hai yaar ${userName}... Thodi der mein try karte hain cool? 😎`, threadID, messageID);
         }
 
     } catch (err) {
         console.error("Nitya Bot Catch-all Error:", err);
-        const fallbackUserName = event.senderID ? await getUserName(api, event.senderID) : "sweetie";
+        const fallbackUserName = event.senderID ? await getUserName(api, event.senderID) : "yaar";
         // api.sendTypingIndicator को कॉल करने से पहले threadID सुनिश्चित करें
         if (event && event.threadID) {
             api.sendTypingIndicator(event.threadID, false);
         }
         // messageID सुनिश्चित करें
         const replyToMessageID = event && event.messageID ? event.messageID : null;
-        return api.sendMessage(`Aww, mere dimag mein thodi gadbad ho gayi ${fallbackUserName}... baad mein baat karte hain pyaar se! 💔`, event.threadID, replyToMessageID);
+        // MODIFIED: Modernized catch-all error
+        return api.sendMessage(`Argh, mere system mein kuch problem aa gayi ${fallbackUserName}! Baad mein baat karte hain... 😅`, event.threadID, replyToMessageID);
     }
 };
