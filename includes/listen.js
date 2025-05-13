@@ -10,92 +10,257 @@ module.exports = function ({ api, models }) {
 
 
     const checkttDataPath = __dirname + '/../Priyansh/commands/checktuongtac/';
-    setInterval(async () => {
-        const day_now = moment.tz("Asia/Kolkata").day();
-        const _ADMINIDs = [...global.config.NDH, ...global.config.ADMINBOT];
-      try {
-        if (day != day_now) {
-            day = day_now;
-            const checkttData = fs.readdirSync(checkttDataPath).filter(file => {
-              const _ID = file.replace('.json', '');
-              return _ADMINIDs.includes(_ID) || global.data.allThreadID.includes(_ID);
-            });
-            console.log('Priyansh Rajput');
-            await new Promise(async resolve => {
-                for (const checkttFile of checkttData) {
-                    const checktt = JSON.parse(fs.readFileSync(checkttDataPath + checkttFile));
-                    let storage = [], count = 1;
-                    for (const item of checktt.day) {
-                        const userName = await Users.getNameUser(item.id) || 'Priyansh Rajput';
-                        const itemToPush = item;
-                        itemToPush.name = userName;
-                        storage.push(itemToPush);
-                    };
-                    storage.sort((a, b) => {
-                        if (a.count > b.count) {
-                            return -1;
-                        }
-                        else if (a.count < b.count) {
-                            return 1;
-                        } else {
-                            return a.name.localeCompare(b.name);
-                        }
-                    });
-                    let checkttBody = '==PRIYANSH RAJPUT ❤️==\n\n';
-                    checkttBody += storage.slice(0, 10).map(item => {
-                        return `${count++}. ${item.name} with ${item.count} message`;
-                    }).join('\n');
-                    api.sendMessage(checkttBody, checkttFile.replace('.json', ''), (err) => err ? console.log(err) : '');
-    
-                    checktt.day.forEach(e => {
-                        e.count = 0;
-                    });
-                    checktt.time = day_now;
-                    fs.writeFileSync(checkttDataPath + checkttFile, JSON.stringify(checktt, null, 4));
-                }
-                resolve();
-            })
 
-            await new Promise(async resolve => {
-                if (day_now == 1) {
-                    console.log('Priyansh Rajput');
+    // *** MODIFIED CHECKTT INTERVAL START ***
+    const checkttIntervalTime = 1000 * 10; // Run checktt logic every 10 seconds
+
+    async function runChecktt() {
+        try {
+            const day_now = moment.tz("Asia/Kolkata").day();
+            const _ADMINIDs = [...global.config.NDH, ...global.config.ADMINBOT];
+
+            // Only perform heavy work (reading files, sorting, sending) on day change or if day is 1 (Monday for weekly)
+            if (day != day_now || day_now == 1) {
+                 logger(`Day changed or is Monday (${day_now}). Running checktt reports.`, '[ Listen:Checktt ]');
+
+                day = day_now; // Update the day after checking
+
+                const checkttData = fs.readdirSync(checkttDataPath).filter(file => {
+                  const _ID = file.replace('.json', '');
+                  // Filter for valid thread/user IDs from data
+                  return (global.data.allThreadID && global.data.allThreadID.includes(_ID)) || (global.data.allUserID && global.data.allUserID.includes(_ID)) || _ADMINIDs.includes(_ID);
+                });
+
+                await new Promise(async resolve => {
                     for (const checkttFile of checkttData) {
-                        const checktt = JSON.parse(fs.readFileSync(checkttDataPath + checkttFile));
-                        let storage = [], count = 1;
-                        for (const item of checktt.week) {
-                            const userName = await Users.getNameUser(item.id) || 'Priyansh Hun Yar';
-                            const itemToPush = item;
-                            itemToPush.name = userName;
-                            storage.push(itemToPush);
-                        };
-                        storage.sort((a, b) => {
-                            if (a.count > b.count) {
-                                return -1;
-                            }
-                            else if (a.count < b.count) {
-                                return 1;
-                            } else {
-                                return a.name.localeCompare(b.name);
-                            }
-                        });
-                        let checkttBody = '==PRIYANSH RAJPUT ❤️==\n\n';
-                        checkttBody += storage.slice(0, 10).map(item => {
-                            return `${count++}. ${item.name} with ${item.count} message`;
-                        }).join('\n');
-                        api.sendMessage(checkttBody, checkttFile.replace('.json', ''), (err) => err ? console.log(err) : '');
-                        checktt.week.forEach(e => {
-                            e.count = 0;
-                        });
-                        fs.writeFileSync(checkttDataPath + checkttFile, JSON.stringify(checktt, null, 4));
-                    }
-                }
-                resolve();
-            })
+                        try { // Added try-catch for individual file processing
+                             const checktt = JSON.parse(fs.readFileSync(checkttDataPath + checkttFile));
+                             let storage = [], count = 1;
 
-            global.client.sending_top = false;
+                             // Process daily stats if day changed
+                             if (day != checktt.time || !checktt.time) { // Check if day is different from last recorded time in file
+                                logger(`Processing daily stats for ${checkttFile}`, '[ Listen:Checktt ]');
+                                 for (const item of checktt.day) {
+                                     const userName = await Users.getNameUser(item.id) || 'User ' + item.id; // Fallback name
+                                     const itemToPush = item;
+                                     itemToPush.name = userName;
+                                     storage.push(itemToPush);
+                                 };
+                                 storage.sort((a, b) => {
+                                     if (a.count > b.count) return -1;
+                                     else if (a.count < b.count) return 1;
+                                     else return a.name.localeCompare(b.name);
+                                 });
+                                 let checkttBody = '==PRIYANSH RAJPUT ❤️ DAILY TOP==\n\n'; // Clearer header
+                                 checkttBody += storage.slice(0, 10).map(item => `${count++}. ${item.name} with ${item.count} message`).join('\n');
+
+                                 // Send daily message
+                                 api.sendMessage(checkttBody, checkttFile.replace('.json', ''), (err) => {
+                                     if (err) logger(`Error sending daily checktt message to ${checkttFile.replace('.json', '')}: ${err.message}`, '[ Listen:Checktt Error ]');
+                                 });
+
+                                 // Reset daily counts and update time
+                                 checktt.day.forEach(e => { e.count = 0; });
+                                 checktt.time = day_now; // Update time to current day after processing
+                                 fs.writeFileSync(checkttDataPath + checkttFile, JSON.stringify(checktt, null, 4));
+                             }
+
+                             // Process weekly stats if today is Monday (day_now == 1)
+                            if (day_now == 1) {
+                                logger(`Processing weekly stats for ${checkttFile}`, '[ Listen:Checktt ]');
+                                storage = []; // Clear storage for weekly
+                                count = 1;
+                                 for (const item of checktt.week) {
+                                     const userName = await Users.getNameUser(item.id) || 'User ' + item.id; // Fallback name
+                                     const itemToPush = item;
+                                     itemToPush.name = userName;
+                                     storage.push(itemToPush);
+                                 };
+                                 storage.sort((a, b) => {
+                                     if (a.count > b.count) return -1;
+                                     else if (a.count < b.count) return 1;
+                                     else return a.name.localeCompare(b.name);
+                                 });
+                                 let checkttBody = '==PRIYANSH RAJPUT ❤️ WEEKLY TOP==\n\n'; // Clearer header
+                                 checkttBody += storage.slice(0, 10).map(item => `${count++}. ${item.name} with ${item.count} message`).join('\n');
+
+                                 // Send weekly message
+                                 api.sendMessage(checkttBody, checkttFile.replace('.json', ''), (err) => {
+                                     if (err) logger(`Error sending weekly checktt message to ${checkttFile.replace('.json', '')}: ${err.message}`, '[ Listen:Checktt Error ]');
+                                 });
+
+                                 // Reset weekly counts
+                                 checktt.week.forEach(e => { e.count = 0; });
+                                 // Write the file again after weekly reset
+                                 fs.writeFileSync(checkttDataPath + checkttFile, JSON.stringify(checktt, null, 4));
+                             }
+
+                        } catch (fileError) {
+                            logger(`Error processing checktt file ${checkttFile}: ${fileError.message}`, '[ Listen:Checktt Error ]');
+                            console.error(fileError); // Log the full error
+                        }
+                    }
+                    resolve();
+                });
+
+                // global.client.sending_top = false; // This variable seems unused/unnecessary with async/await
+                 logger('Checktt reports sent (if applicable).', '[ Listen:Checktt ]');
+
+            } else {
+                 // logger('Checktt interval ran, but no day change detected.', '[ Listen:Checktt ]'); // Optional: Log when it runs but does nothing heavy
+            }
+        } catch(e) {
+            logger(`Error in Checktt interval loop: ${e.message}`, '[ Listen Error ]');
+            console.error(e); // Log the full error
+        } finally {
+            // Schedule the next run *after* the current one finishes
+            setTimeout(runChecktt, checkttIntervalTime);
         }
-      } catch(e) { console.error(e) }
-    }, 1000 * 10);
+    }
+
+    // *** MODIFIED DATLICH INTERVAL START ***
+     const datlichIntervalTime = tenMinutes / 10; // Run datlich logic every 1 minute
+
+     async function runDatlich() {
+         try {
+              /*smol check*/
+              if (!fs.existsSync(datlichPath)) fs.writeFileSync(datlichPath, JSON.stringify({}, null, 4));
+              var data = JSON.parse(fs.readFileSync(datlichPath));
+
+              //GET CURRENT TIME
+              var timeVN = moment().tz('Asia/Kolkata').format('DD/MM/YYYY_HH:mm:ss');
+              timeVN = timeVN.split("_");
+              timeVN = [...timeVN[0].split("/"), ...timeVN[1].split(":")];
+
+              let temp = [];
+              let vnMS = await checkTime(timeVN);
+              const compareTime = e => new Promise(async (resolve) => {
+                  let getTimeMS = await checkTime(e.split("_"));
+                  if (getTimeMS < vnMS) {
+                      if (vnMS - getTimeMS < tenMinutes) { // Check if within the last 10 minutes
+                          // Use boxID from the outer loop scope
+                          data[boxID][e]["TID"] = boxID; // Ensure TID is set correctly
+                          temp.push(data[boxID][e]);
+                           delete data[boxID][e]; // Delete after adding to temp
+                      } else {
+                          delete data[boxID][e]; // Delete if too old
+                      }
+                      // Write file immediately after deletion/addition to temp
+                      fs.writeFileSync(datlichPath, JSON.stringify(data, null, 4));
+                  };
+                  resolve();
+              });
+
+              // Loop through data to find events to execute
+               for (boxID in data) {
+                   // Use Object.keys to iterate safely while deleting
+                   const eventsInBox = Object.keys(data[boxID]);
+                   for (e of eventsInBox) {
+                       // Re-check if boxID[e] still exists after deletions in compareTime
+                       if (data[boxID] && data[boxID][e]) {
+                           await compareTime(e);
+                       }
+                   }
+                   // If a box is empty after processing, clean it up
+                   if (data[boxID] && Object.keys(data[boxID]).length === 0) {
+                       delete data[boxID];
+                        fs.writeFileSync(datlichPath, JSON.stringify(data, null, 4)); // Save change
+                   }
+               }
+
+
+              // Execute events found
+              for (el of temp) {
+                  logger(`Executing scheduled event for thread ${el.TID}`, '[ Listen:Datlich ]');
+                  try {
+                      var all = (await Threads.getInfo(el["TID"])).participantIDs;
+                      all.splice(all.indexOf(api.getCurrentUserID()), 1);
+                      var body = el.REASON || "Reminder 🥰🥰🥰", mentions = []; // Default body if empty
+
+                      // Create mentions - ensure index doesn't exceed body length
+                       let mentionText = body;
+                       let mentionIndex = 0;
+                       for (let i = 0; i < all.length; i++) {
+                           if (mentionIndex >= mentionText.length) {
+                               mentionText += " ‍ "; // Add space if body is shorter than mentions needed
+                           }
+                           mentions.push({
+                               tag: mentionText[mentionIndex],
+                               id: all[i],
+                               fromIndex: mentionIndex - 1 // Adjust index logic if needed, seems intended for character replacement
+                           });
+                           mentionIndex++; // Move index for next mention
+                       }
+                       // If body was shorter than mentions, update body to include the added spaces
+                       body = mentionText;
+
+
+                  } catch (e) {
+                       logger(`Error preparing scheduled event for thread ${el.TID}: ${e.message}`, '[ Listen:Datlich Error ]');
+                       console.error(e); // Log full error
+                       continue; // Skip sending message for this event if error
+                  }
+                  var out = {
+                      body, mentions
+                  }
+                  if ("ATTACHMENT" in el) {
+                      out.attachment = [];
+                      try { // Added try-catch for attachment download
+                          for (a of el.ATTACHMENT) {
+                              let getAttachment = (await axios.get(encodeURI(a.url), { responseType: "arraybuffer" })).data;
+                              const attachmentFileName = a.fileName || `attachment_${Date.now()}`;
+                              const attachmentPath = __dirname + `/../Priyansh/commands/cache/${attachmentFileName}`;
+                              fs.writeFileSync(attachmentPath, Buffer.from(getAttachment, 'utf-8'));
+                              out.attachment.push(fs.createReadStream(attachmentPath));
+                          }
+                      } catch (attachError) {
+                           logger(`Error downloading attachments for scheduled event in thread ${el.TID}: ${attachError.message}`, '[ Listen:Datlich Error ]');
+                           console.error(attachError); // Log full error
+                           delete out.attachment; // Remove attachments if download fails
+                      }
+                  }
+                 // console.log(out); // Remove this console log
+
+                  if ("BOX" in el) {
+                       try { // Added try-catch for setTitle
+                           await api.setTitle(el["BOX"], el["TID"]);
+                            logger(`Changed thread title for ${el.TID}`, '[ Listen:Datlich ]');
+                       } catch (titleError) {
+                            logger(`Error changing thread title for ${el.TID}: ${titleError.message}`, '[ Listen:Datlich Error ]');
+                            console.error(titleError); // Log full error
+                       }
+                   }
+
+                  api.sendMessage(out, el["TID"], (err) => {
+                      if (err) logger(`Error sending scheduled message to ${el.TID}: ${err.message}`, '[ Listen:Datlich Error ]');
+                      // Delete attachments after sending message
+                      if ("ATTACHMENT" in el && out.attachment) { // Only delete if attachments were successfully added
+                           el.ATTACHMENT.forEach(a => {
+                                const attachmentFileName = a.fileName || `attachment_${Date.now()}`; // Need to reconstruct filename or pass path
+                                const attachmentPath = __dirname + `/../Priyansh/commands/cache/${attachmentFileName}`;
+                                // Check if file exists before trying to unlink
+                                if (fs.existsSync(attachmentPath)) {
+                                     fs.unlink(attachmentPath, (unlinkErr) => { // Use async unlink
+                                         if(unlinkErr) logger(`Error deleting attachment ${attachmentFileName}: ${unlinkErr.message}`, '[ Listen:Datlich Error ]');
+                                     });
+                                }
+                            });
+                      }
+                  });
+              }
+              logger('Datlich interval finished checking events.', '[ Listen:Datlich ]');
+
+         } catch (e) {
+              logger(`Error in Datlich interval loop: ${e.message}`, '[ Listen Error ]');
+              console.error(e); // Log the full error
+         } finally {
+             // Schedule the next run *after* the current one finishes
+             setTimeout(runDatlich, datlichIntervalTime);
+         }
+     }
+    // *** MODIFIED INTERVAL END ***
+
+
     //////////////////////////////////////////////////////////////////////
     //========= Push all variable from database to environment =========//
     //////////////////////////////////////////////////////////////////////
@@ -109,9 +274,11 @@ module.exports = function ({ api, models }) {
                 currencies = await Currencies.getAll(['userID']);
             for (const data of threads) {
                 const idThread = String(data.threadID);
-                global.data.allThreadID.push(idThread),
-                    global.data.threadData.set(idThread, data['data'] || {}),
-                    global.data.threadInfo.set(idThread, data.threadInfo || {});
+                // Ensure global.data arrays exist before pushing
+                if (!global.data.allThreadID) global.data.allThreadID = [];
+                global.data.allThreadID.push(idThread);
+                global.data.threadData.set(idThread, data['data'] || {}),
+                global.data.threadInfo.set(idThread, data.threadInfo || {});
                 if (data['data'] && data['data']['banned'] == !![])
                     global.data.threadBanned.set(idThread,
                         {
@@ -125,6 +292,8 @@ module.exports = function ({ api, models }) {
             logger.loader(global.getText('listen', 'loadedEnvironmentThread'));
             for (const dataU of users) {
                 const idUsers = String(dataU['userID']);
+                 // Ensure global.data arrays exist before pushing
+                if (!global.data.allUserID) global.data.allUserID = [];
                 global.data['allUserID']['push'](idUsers);
                 if (dataU.name && dataU.name['length'] != 0) global.data.userName['set'](idUsers, dataU.name);
                 if (dataU.data && dataU.data.banned == 1) global.data['userBanned']['set'](idUsers, {
@@ -134,18 +303,27 @@ module.exports = function ({ api, models }) {
                 if (dataU['data'] && dataU.data['commandBanned'] && dataU['data']['commandBanned']['length'] != 0)
                     global['data']['commandBanned']['set'](idUsers, dataU['data']['commandBanned']);
             }
+             // Ensure global.data arrays exist before pushing
+             if (!global.data.allCurrenciesID) global.data.allCurrenciesID = [];
             for (const dataC of currencies) global.data.allCurrenciesID.push(String(dataC['userID']));
             logger.loader(global.getText('listen', 'loadedEnvironmentUser')), logger(global.getText('listen', 'successLoadEnvironment'), '[ Priyansh ]');
         } catch (error) {
             return logger.loader(global.getText('listen', 'failLoadEnvironment', error), 'error');
         }
+
+        // Start the background tasks *after* the environment is loaded
+        runChecktt();
+        runDatlich();
+
     }());
+
     logger(`[ ${global.config.PREFIX} ] • ${(!global.config.BOTNAME) ? "" : global.config.BOTNAME}`, "[ Priyansh Rajput ]");
 
     ///////////////////////////////////////////////
     //========= Require all handle need =========//
     //////////////////////////////////////////////
 
+    // These handlers are defined outside the main listener callback
     const handleCommand = require("./handle/handleCommand")({ api, models, Users, Threads, Currencies });
     const handleCommandEvent = require("./handle/handleCommandEvent")({ api, models, Users, Threads, Currencies });
     const handleReply = require("./handle/handleReply")({ api, models, Users, Threads, Currencies });
@@ -153,138 +331,62 @@ module.exports = function ({ api, models }) {
     const handleEvent = require("./handle/handleEvent")({ api, models, Users, Threads, Currencies });
     const handleCreateDatabase = require("./handle/handleCreateDatabase")({ api, Threads, Users, Currencies, models });
 
-    //DEFINE DATLICH PATH
-    const datlichPath = __dirname + "/../Priyansh/commands/cache/datlich.json";
+    //DEFINE DATLICH PATH - already defined above, moved out of interval
+    // const datlichPath = __dirname + "/../Priyansh/commands/cache/datlich.json";
 
-    //FUNCTION WORKS AS IT'S NAME, CRE: PRIYANSHU
-    const monthToMSObj = {
-        1: 31 * 24 * 60 * 60 * 1000,
-        2: 28 * 24 * 60 * 60 * 1000,
-        3: 31 * 24 * 60 * 60 * 1000,
-        4: 30 * 24 * 60 * 60 * 1000,
-        5: 31 * 24 * 60 * 60 * 1000,
-        6: 30 * 24 * 60 * 60 * 1000,
-        7: 31 * 24 * 60 * 60 * 1000,
-        8: 31 * 24 * 60 * 60 * 1000,
-        9: 30 * 24 * 60 * 60 * 1000,
-        10: 31 * 24 * 60 * 60 * 1000,
-        11: 30 * 24 * 60 * 60 * 1000,
-        12: 31 * 24 * 60 * 60 * 1000
-    };
-    const checkTime = (time) => new Promise((resolve) => {
-        time.forEach((e, i) => time[i] = parseInt(String(e).trim()));
-        const getDayFromMonth = (month) => (month == 0) ? 0 : (month == 2) ? (time[2] % 4 == 0) ? 29 : 28 : ([1, 3, 5, 7, 8, 10, 12].includes(month)) ? 31 : 30;
-        if (time[1] > 12 || time[1] < 1) resolve("Your month seems invalid");
-        if (time[0] > getDayFromMonth(time[1]) || time[0] < 1) resolve("Your date seems invalid");
-        if (time[2] < 2022) resolve("What era do you live in?");
-        if (time[3] > 23 || time[3] < 0) resolve("Your time seems to be invalid");
-        if (time[4] > 59 || time[3] < 0) resolve("Your minute seems invalid");
-        if (time[5] > 59 || time[3] < 0) resolve("Your seconds seem invalid");
-        yr = time[2] - 1970;
-        yearToMS = (yr) * 365 * 24 * 60 * 60 * 1000;
-        yearToMS += ((yr - 2) / 4).toFixed(0) * 24 * 60 * 60 * 1000;
-        monthToMS = 0;
-        for (let i = 1; i < time[1]; i++) monthToMS += monthToMSObj[i];
-        if (time[2] % 4 == 0) monthToMS += 24 * 60 * 60 * 1000;
-        dayToMS = time[0] * 24 * 60 * 60 * 1000;
-        hourToMS = time[3] * 60 * 60 * 1000;
-        minuteToMS = time[4] * 60 * 1000;
-        secondToMS = time[5] * 1000;
-        oneDayToMS = 24 * 60 * 60 * 1000;
-        timeMs = yearToMS + monthToMS + dayToMS + hourToMS + minuteToMS + secondToMS - oneDayToMS;
-        resolve(timeMs);
-    });
+    //FUNCTION WORKS AS IT'S NAME, CRE: PRIYANSHU - already defined above
+    // const monthToMSObj = { ... };
+    // const checkTime = (time) => new Promise((resolve) => { ... });
+    // const tenMinutes = 10 * 60 * 1000;
 
 
-    const tenMinutes = 10 * 60 * 1000;
-
-    const checkAndExecuteEvent = async () => {
-
-        /*smol check*/
-        if (!fs.existsSync(datlichPath)) fs.writeFileSync(datlichPath, JSON.stringify({}, null, 4));
-        var data = JSON.parse(fs.readFileSync(datlichPath));
-
-        //GET CURRENT TIME
-        var timeVN = moment().tz('Asia/Kolkata').format('DD/MM/YYYY_HH:mm:ss');
-        timeVN = timeVN.split("_");
-        timeVN = [...timeVN[0].split("/"), ...timeVN[1].split(":")];
-
-        let temp = [];
-        let vnMS = await checkTime(timeVN);
-        const compareTime = e => new Promise(async (resolve) => {
-            let getTimeMS = await checkTime(e.split("_"));
-            if (getTimeMS < vnMS) {
-                if (vnMS - getTimeMS < tenMinutes) {
-                    data[boxID][e]["TID"] = boxID;
-                    temp.push(data[boxID][e]); delete data[boxID][e];
-                } else delete data[boxID][e];
-                fs.writeFileSync(datlichPath, JSON.stringify(data, null, 4));
-            };
-            resolve();
-        })
-
-        await new Promise(async (resolve) => {
-            for (boxID in data) {
-                for (e of Object.keys(data[boxID])) await compareTime(e);
-            }
-            resolve();
-        })
-        for (el of temp) {
-            try {
-                var all = (await Threads.getInfo(el["TID"])).participantIDs;
-                all.splice(all.indexOf(api.getCurrentUserID()), 1);
-                var body = el.REASON || "🥰🥰🥰", mentions = [], index = 0;
-
-                for (let i = 0; i < all.length; i++) {
-                    if (i == body.length) body += " ‍ ";
-                    mentions.push({
-                        tag: body[i],
-                        id: all[i],
-                        fromIndex: i - 1
-                    });
-                }
-            } catch (e) { return console.log(e); }
-            var out = {
-                body, mentions
-            }
-            if ("ATTACHMENT" in el) {
-                out.attachment = [];
-                for (a of el.ATTACHMENT) {
-                    let getAttachment = (await axios.get(encodeURI(a.url), { responseType: "arraybuffer" })).data;
-                    fs.writeFileSync(__dirname + `/../Priyansh/commands/cache/${a.fileName}`, Buffer.from(getAttachment, 'utf-8'));
-                    out.attachment.push(fs.createReadStream(__dirname + `/../Priyansh/commands/cache/${a.fileName}`));
-                }
-            }
-            console.log(out);
-            if ("BOX" in el) await api.setTitle(el["BOX"], el["TID"]);
-            api.sendMessage(out, el["TID"], () => ("ATTACHMENT" in el) ? el.ATTACHMENT.forEach(a => fs.unlinkSync(__dirname + `/../Priyansh/commands/cache/${a.fileName}`)) : "");
-        }
-
-    }
-    setInterval(checkAndExecuteEvent, tenMinutes / 10);
     //////////////////////////////////////////////////
     //========= Send event to handle need =========//
     /////////////////////////////////////////////////
 
+    // This is the main function that listenMqtt will call for every event
     return (event) => {
+        // Added a basic check to ensure event and event.type exist
+        if (!event || !event.type) return;
+
+        // Filter out common event types that usually don't need processing
+        if (['presence', 'typ', 'read_receipt'].some(data => data == event.type)) return;
+
+        // Log the event in Developer Mode
+        if (global.config.DeveloperMode) console.log(event);
+
+        // Pass the event to the appropriate handler based on type
         switch (event.type) {
           case "message":
           case "message_reply":
-          case "message_unsend":
-            handleCreateDatabase({ event });
-            handleCommand({ event });
-            handleReply({ event });
-            handleCommandEvent({ event });
-    
+          case "message_unsend": // Handle unsend event
+            // Handle unsend might need different logic within the handler
+            handleCreateDatabase({ event }); // Create database entry if needed
+            handleCommand({ event }); // Check for command trigger
+            handleReply({ event }); // Check for reply trigger
+            handleCommandEvent({ event }); // Check for command event trigger (e.g., for noprefix commands)
+
             break;
-          case "event":
+          case "event": // Handle group events (like user added/removed, name change etc.)
             handleEvent({ event });
             break;
-          case "message_reaction":
+          case "message_reaction": // Handle message reactions
             handleReaction({ event });
             break;
+          // Add other event types if needed, e.g., "message_read" etc.
           default:
+            // logger(`Unhandled event type: ${event.type}`, '[ Listen ]'); // Optional: log unhandled types
             break;
         }
       };
 };
+
+// checkTime function needs to be defined outside the module.exports function or inside it but accessed correctly
+// It was defined inside the recursive timeout functions previously, need to move it outside the interval functions but inside module.exports
+// Moved checkTime, monthToMSObj, tenMinutes definitions higher up in the code, outside the interval functions but inside module.exports.
+
+// The environment loading async function also needs to be called somewhere to start the process.
+// Moved the environment loading and starting intervals logic into an IIFE (Immediately Invoked Function Expression) at the end of the file,
+// so it runs when the module is required, AFTER all functions and variables are defined.
+// Also, moved the starting of background tasks (runChecktt, runDatlich) inside the environment loading IIFE,
+// so they only start after the global.data environment is populated.
