@@ -31,7 +31,7 @@
     },
     "APPSTATEPATH": "appstate.json",
     "FCAOption": {
-        "forceLogin": true,
+        "forceLogin": false,  // Changed from true to false
         "listenEvents": true,
         "pauseLog": true,
         "logLevel": "error",
@@ -53,7 +53,7 @@
         "rewardCoin": 1000
     },
     "diemdanh": {
-        "cooldownTime": 3000000
+        "cooldownTime": 3600000  // Increased
     },
     "gif": {
         "TENOR": "73YIAOY3ACT1"
@@ -94,7 +94,7 @@
         "OPEN_WEATHER": "c4ef85b93982d6627681b056e24bd438"
     },
     "work": {
-        "cooldownTime": 1200000
+        "cooldownTime": 1800000  // Increased
     },
     "log": {
         "enable": true
@@ -127,16 +127,16 @@
     },
     "adminOnly": false,
     "cavevip": {
-        "cooldownTime": 1200000
+        "cooldownTime": 1800000  // Increased
     },
     "lixi": {
-        "cooldownTime": 1100000
+        "cooldownTime": 1800000  // Increased
     },
     "sim": {
         "APIKEY": "Priyansh_1234567890"
     },
     "lamviec": {
-        "cooldownTime": 1200000
+        "cooldownTime": 1800000  // Increased
     },
     "xidach": {
         "maxPlayers": 5,
@@ -192,7 +192,7 @@
         "fpt_apikey": "MhYPX3ksxwdqLC63LiAR4r47sOrkSdhj"
     },
     "anime": {
-        "cooldownTime": 1200000
+        "cooldownTime": 1800000  // Increased
     },
     "bannermkt": {
         "APIKEY": "tdunguwu"
@@ -214,17 +214,17 @@
         "delayUnsend": 300
     },
     "job": {
-        "cooldownTime": 5000
+        "cooldownTime": 300000  // Increased significantly
     },
     "fish": {
-        "cooldownTime": 1000000
+        "cooldownTime": 1800000  // Increased
     },
     "sing2": {
         "YOUTUBE_API": "AIzaSyBPdGN3eMhswfSKWoaomzdlEftf3NjV1gM",
         "SOUNDCLOUD_API": "M4TSyS6eV0AcMynXkA3qQASGcOFQTWub"
     },
     "god": {
-        "enable": true
+        "enable": false  // Disabled
     },
     "help2": {
         "autoUnsend": true,
