@@ -1,25 +1,35 @@
-const fs = global.nodemodule["fs-extra"];
+Const fs = global.nodemodule["fs-extra"];
 
 module.exports.config = {
   name: "goibot",
-  version: "1.0.2",
+  version: "1.0.3", // Version updated for changes
   hasPermssion: 0,
-  credits: "Fixed By Rudra Stylish + Styled by ChatGPT",
-  description: "Flirty replies when someone says bot",
+  credits: "Fixed By Rudra Stylish + Styled by ChatGPT + Anti-detection by Gemini", // Added anti-detection credit
+  description: "Flirty/Funny replies when someone says bot with anti-detection measures", // Updated description
   commandCategory: "No prefix",
   usages: "No prefix needed",
-  cooldowns: 5,
+  cooldowns: 5, // Keep cooldowns
 };
+
+// Add a delay function
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 module.exports.handleEvent = async function({ api, event, args, Threads, Users }) {
   const moment = require("moment-timezone");
   const time = moment.tz("Asia/Kolkata").format("DD/MM/YYYY || HH:mm:ss");
 
   const { threadID, messageID } = event;
+  // Ensure event.senderID exists before getting name
+  if (!event.senderID) return;
   const name = await Users.getNameUser(event.senderID);
+  // Ensure name is available
+  if (!name) return;
+
 
   const tl = [
-    // Flirty Messages
+    // Flirty Messages (Keep existing)
     "Tumhare bina toh bot bhi udaasi mein chala jaata hai...💔🤖",
     "Aaj mausam bada suhana hai, Rudra Stylish ko tum yaad aa rahe ho...🌦️",
     "Aankhon mein teri ajab si adaayein hai...🤭",
@@ -69,7 +79,7 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "Dil chhota mat kar, Rudra Stylish sirf tera...❤️‍🔥",
     "Naam Rudra Stylish, kaam – teri smile banana...😁",
     "Tera reply na aaye toh CPU heat hone lagta hai...🌡️",
-    // Funny Viral Lines
+    // Funny Viral Lines (Keep existing)
     "Kya Tu ELvish Bhai Ke Aage Bolega🙄",
     "Cameraman Jaldi Focus Kro 📸",
     "Lagdi Lahore di aa🙈",
@@ -88,9 +98,9 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
   ];
 
   const borders = [
-    "╔═══ ❖ ═══╗", 
-    "•─────✾─────•", 
-    "✿◕ ‿ ◕✿", 
+    "╔═══ ❖ ═══╗",
+    "•─────✾─────•",
+    "✿◕ ‿ ◕✿",
     "༺═────────────═༻",
     "꧁༒☬✞☬༒꧂",
     "┏━━━✦❘༻༺❘✦━━━┓",
@@ -105,19 +115,46 @@ module.exports.handleEvent = async function({ api, event, args, Threads, Users }
     "▄︻̷̿┻̿═━一"
   ];
 
-  if (event.body?.toLowerCase().startsWith("bot")) {
-    const rand = tl[Math.floor(Math.random() * tl.length)];
-    const randomBorder = borders[Math.floor(Math.random() * borders.length)];
-    
-    api.sendTypingIndicator(threadID, true);
-    
-    const msg = {
-      body: `${randomBorder}\n\n✨ 𝓗𝓮𝔂 ✨ *『 ${name} 』*\n\n『 ${rand} 』\n\n— Rudra Stylish 💖\n\n${randomBorder}`
-    };
-
-    api.sendTypingIndicator(threadID, false);
-    return api.sendMessage(msg, threadID, messageID);
+  // Check if the message starts with "bot" (case-insensitive)
+  // Added a check to ensure event.body exists and is a string
+  if (typeof event.body !== 'string' || !event.body.toLowerCase().startsWith("bot")) {
+      return; // Do nothing if trigger not met
   }
+
+  // *** ANTI-DETECTION LOGIC START ***
+
+  // Add a random chance to respond (e.g., 40%)
+  const responseChance = 0.4; // 40% chance
+  if (Math.random() > responseChance) {
+      console.log("Goibot: Decided not to respond based on random chance."); // Log for debugging
+      return; // Do not respond
+  }
+
+  // Add a small random delay (e.g., 3 to 5 seconds)
+  const minDelay = 3000; // 3 seconds
+  const maxDelay = 5000; // 5 seconds
+  const randomDelay = Math.random() * (maxDelay - minDelay) + minDelay;
+
+  api.sendTypingIndicator(threadID, true); // Turn ON typing indicator
+
+  await delay(randomDelay); // Wait for the random delay
+
+  api.sendTypingIndicator(threadID, false); // Turn OFF typing indicator
+  // *** ANTI-DETECTION LOGIC END ***
+
+
+  const rand = tl[Math.floor(Math.random() * tl.length)];
+  const randomBorder = borders[Math.floor(Math.random() * borders.length)];
+
+  const msg = {
+    body: `${randomBorder}\n\n✨ 𝓗𝓮𝔂 ✨ *『 ${name} 』*\n\n『 ${rand} 』\n\n— Rudra Stylish 💖\n\n${randomBorder}`
+  };
+
+  // Send the message after the delay and typing indicator is off
+  return api.sendMessage(msg, threadID, messageID);
+
 };
 
-module.exports.run = function({ api, event, client, __GLOBAL }) {};
+module.exports.run = function({ api, event, client, __GLOBAL }) {
+    // Run function is empty for noprefix commands
+};
