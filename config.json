@@ -16,7 +16,7 @@
     "EMAIL": "",
     "PASSWORD": "",
     "OTPKEY": "",
-    "BOTNAME": "Rudra-B",
+    "BOTNAME": "Rudra ji-B",
     "PREFIX": "+",
     "ADMINBOT": [
         "61550558518720"
@@ -31,7 +31,7 @@
     },
     "APPSTATEPATH": "appstate.json",
     "FCAOption": {
-        "forceLogin": false,  // Changed from true to false
+        "forceLogin": true,
         "listenEvents": true,
         "pauseLog": true,
         "logLevel": "error",
@@ -53,7 +53,7 @@
         "rewardCoin": 1000
     },
     "diemdanh": {
-        "cooldownTime": 3600000  // Increased
+        "cooldownTime": 3000000
     },
     "gif": {
         "TENOR": "73YIAOY3ACT1"
@@ -94,7 +94,7 @@
         "OPEN_WEATHER": "c4ef85b93982d6627681b056e24bd438"
     },
     "work": {
-        "cooldownTime": 1800000  // Increased
+        "cooldownTime": 1200000
     },
     "log": {
         "enable": true
@@ -127,16 +127,16 @@
     },
     "adminOnly": false,
     "cavevip": {
-        "cooldownTime": 1800000  // Increased
+        "cooldownTime": 1200000
     },
     "lixi": {
-        "cooldownTime": 1800000  // Increased
+        "cooldownTime": 1100000
     },
     "sim": {
         "APIKEY": "Priyansh_1234567890"
     },
     "lamviec": {
-        "cooldownTime": 1800000  // Increased
+        "cooldownTime": 1200000
     },
     "xidach": {
         "maxPlayers": 5,
@@ -192,7 +192,7 @@
         "fpt_apikey": "MhYPX3ksxwdqLC63LiAR4r47sOrkSdhj"
     },
     "anime": {
-        "cooldownTime": 1800000  // Increased
+        "cooldownTime": 1200000
     },
     "bannermkt": {
         "APIKEY": "tdunguwu"
@@ -214,20 +214,27 @@
         "delayUnsend": 300
     },
     "job": {
-        "cooldownTime": 300000  // Increased significantly
+        "cooldownTime": 5000
     },
     "fish": {
-        "cooldownTime": 1800000  // Increased
+        "cooldownTime": 1000000
     },
     "sing2": {
         "YOUTUBE_API": "AIzaSyBPdGN3eMhswfSKWoaomzdlEftf3NjV1gM",
         "SOUNDCLOUD_API": "M4TSyS6eV0AcMynXkA3qQASGcOFQTWub"
     },
     "god": {
-        "enable": false  // Disabled
+        "enable": true
     },
     "help2": {
         "autoUnsend": true,
         "delayUnsend": 300
+    },
+    "antiban": {
+        "autoDelay": true,
+        "minDelay": 5,
+        "maxDelay": 15,
+        "cooldownBetweenMsgs": 3000,
+        "autoTyping": true
     }
 }
